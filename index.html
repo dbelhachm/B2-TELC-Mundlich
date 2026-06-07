@@ -1,0 +1,916 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B2 Mündliche Prüfung – Deutsch & Arabisch</title>
+    <script src="b2-data.js"></script>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#0c0c14;--bg2:#161622;--bg3:#1e1e32;
+            --card:#1a1a2e;--card-hover:#222238;
+            --border:rgba(255,255,255,0.06);--border-active:rgba(251,191,36,0.3);
+            --text:#e8e8f0;--text-dim:#9999bb;--text-muted:#666688;
+            --gold:#f59e0b;--gold-dim:rgba(245,158,11,0.25);--gold-bg:rgba(245,158,11,0.1);
+            --green:#34d399;--green-bg:rgba(52,211,153,0.15);
+            --red:#f87171;--red-bg:rgba(248,113,113,0.15);
+            --blue:#60a5fa;--blue-bg:rgba(96,165,250,0.15);
+            --violet:#a78bfa;--violet-bg:rgba(167,139,250,0.15);
+            --ar:#94a3b8;--ar-bg:rgba(148,163,184,0.08);
+            --radius:12px;--radius-sm:8px;
+            --shadow:0 8px 40px rgba(0,0,0,0.5);
+        }
+        html,body{height:100%}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;-webkit-font-smoothing:antialiased}
+        .app{width:100%;max-width:640px;padding:16px 12px 100px}
+        .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .logo{font-size:18px;font-weight:800}.logo span{color:var(--gold)}
+        .logo-sub{font-size:9px;color:var(--text-muted);font-weight:500;margin-top:-1px}
+        .badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--gold-bg);color:var(--gold);border:1px solid rgba(245,158,11,0.2)}
+        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+        .stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 4px;text-align:center}
+        .stat-num{font-size:16px;font-weight:800;line-height:1.2}
+        .stat-label{font-size:7px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+        .tabs{display:flex;gap:2px;margin-bottom:10px;background:var(--bg2);border-radius:var(--radius);padding:4px;flex-wrap:wrap}
+        .tab{flex:1;min-width:50px;padding:10px 3px;text-align:center;border:none;background:transparent;color:var(--text-muted);font-family:inherit;font-size:10px;font-weight:700;border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;line-height:1.2}
+        .tab:hover{color:var(--text-dim)}
+        .tab.active{background:var(--card);color:var(--text);box-shadow:0 2px 12px rgba(0,0,0,.3)}
+        .tab[data-tab="themes"].active{color:var(--gold);border-bottom:2px solid var(--gold);border-radius:var(--radius-sm) var(--radius-sm) 0 0;background:rgba(245,158,11,0.08)}
+        .tab[data-tab="problems"].active{color:var(--blue);border-bottom:2px solid var(--blue);border-radius:var(--radius-sm) var(--radius-sm) 0 0;background:rgba(96,165,250,0.08)}
+        .tab-group-divider{width:1px;background:var(--border);margin:6px 2px;flex-shrink:0}
+        .tab[data-tab="phrases"].active{color:var(--violet);border-bottom:2px solid var(--violet);border-radius:var(--radius-sm) var(--radius-sm) 0 0;background:rgba(167,139,250,0.08)}
+        .tab[data-tab="myvocab"].active{color:var(--green);border-bottom:2px solid var(--green);border-radius:var(--radius-sm) var(--radius-sm) 0 0;background:rgba(52,211,153,0.08)}
+        .tab[data-tab="quiz"].active{color:#f472b6;border-bottom:2px solid #f472b6;border-radius:var(--radius-sm) var(--radius-sm) 0 0;background:rgba(244,114,182,0.08)}
+        .search-wrap{position:relative;margin-bottom:10px}
+        .search-wrap input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:12px;padding:9px 12px 9px 34px;outline:none}
+        .search-wrap input::placeholder{color:var(--text-muted)}.search-wrap input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+        .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:12px;pointer-events:none}
+        .theme-grid{display:flex;flex-direction:column;gap:5px}
+        .theme-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px}
+        .theme-item:hover{border-color:var(--border-active);background:var(--card-hover)}.theme-item.done{opacity:.5}.theme-item.done .theme-title{text-decoration:line-through}
+        .theme-check{width:16px;height:16px;border-radius:50%;border:2px solid var(--text-muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:9px;font-weight:800}
+        .theme-check.done{background:var(--green);border-color:var(--green);color:#000}
+        .theme-icon{font-size:18px;flex-shrink:0}.theme-info{flex:1;min-width:0}
+        .theme-title{font-size:12px;font-weight:600;line-height:1.3}
+        .theme-sub{font-size:10px;color:var(--ar);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .theme-tag{font-size:8px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--violet-bg);color:var(--violet);flex-shrink:0}
+        .detail-view{display:none}.detail-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+        .detail-back{background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;padding:4px}
+        .detail-back:hover{color:var(--text)}.detail-title-de{font-size:15px;font-weight:700;flex:1;line-height:1.3}
+        .detail-title-ar{font-size:12px;color:var(--ar);margin-top:-2px}
+        .section{margin-bottom:14px}
+        .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--gold);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+        .de-text{font-size:12px;color:var(--text);line-height:1.7;background:var(--bg2);padding:12px 14px;border-radius:var(--radius-sm)}
+        .ar-text{font-size:11px;color:var(--ar);line-height:1.6;background:var(--ar-bg);padding:8px 14px;margin-top:4px;border-radius:var(--radius-sm)}
+        .arg-list{display:flex;flex-direction:column;gap:4px}
+        .arg-card{background:var(--bg2);border-radius:var(--radius-sm);padding:10px 12px;border-left:3px solid var(--gold)}
+        .arg-card .de-arg{font-size:12px;line-height:1.5}
+        .arg-card .ar-arg{font-size:11px;color:var(--ar);margin-top:3px;line-height:1.4}
+        .arg-card.pro{border-left-color:var(--green)}.arg-card.contra{border-left-color:var(--red)}
+        .vocab-list{list-style:none}
+        .vocab-item{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--bg2);border-radius:var(--radius-sm);margin-bottom:3px}
+        .vocab-de{font-weight:600;font-size:12px}.vocab-ar{color:var(--ar);font-size:11px}
+        .phrase-item{font-size:11px;color:var(--text-dim);line-height:1.6;padding:6px 10px;background:var(--bg2);border-radius:var(--radius-sm);margin-bottom:3px}
+        .phrase-item .de-phrase{color:var(--text)}
+        .phrase-item .ar-phrase{color:var(--ar);font-size:10px;margin-top:2px}
+        .ps-card{background:var(--blue-bg);border:1px solid rgba(96,165,250,0.2);border-radius:var(--radius-sm);padding:12px;margin-bottom:6px}
+        .ps-title-de{font-size:12px;font-weight:700;color:var(--text)}
+        .ps-title-ar{font-size:11px;color:var(--ar);margin-top:2px}
+        .ps-text-de{font-size:11px;color:var(--text-dim);line-height:1.5;margin-top:6px}
+        .ps-text-ar{font-size:10px;color:var(--ar);line-height:1.5;margin-top:3px}
+        .idea-item{font-size:11px;padding:5px 10px;background:var(--bg2);border-radius:var(--radius-sm);margin-bottom:2px;color:var(--text-dim)}
+        .idea-item .de-idea{color:var(--text)}
+        .idea-item .ar-idea{color:var(--ar);font-size:10px;margin-top:1px}
+        .qa-area{margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+        .qa-area summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--gold);padding:6px 0;user-select:none}
+        .qa-input-wrap{display:flex;gap:6px;margin-top:8px}
+        .qa-input{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:12px;padding:9px 12px;outline:none}
+        .qa-input:focus{border-color:var(--gold)}.qa-btn{background:var(--gold);color:#000;border:none;border-radius:var(--radius-sm);padding:9px 16px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+        .qa-btn:hover{filter:brightness(1.1)}
+        .qa-answer{margin-top:6px;padding:10px 12px;background:var(--violet-bg);border-radius:var(--radius-sm);font-size:12px;line-height:1.6;display:none}
+        .qa-answer.show{display:block}
+        .qa-hint{font-size:10px;color:var(--text-muted);margin-top:4px}
+        .qa-question{font-size:11px;color:var(--text-dim);margin-top:6px}
+        .empty-state{text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px}
+        .empty-state .big{font-size:36px;margin-bottom:10px}
+        .exam-btn{font-size:9px;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--text-muted);cursor:pointer;font-family:inherit;font-weight:600;transition:all .15s}
+        .exam-btn:hover{background:var(--card-hover);color:var(--text)}
+        .exam-btn.on{background:var(--gold-bg);color:var(--gold);border-color:var(--gold)}
+        .exam-hint{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--gold-bg);border:1px solid rgba(245,158,11,0.3);padding:8px 16px;border-radius:999px;font-size:10px;color:var(--gold);font-weight:600;pointer-events:none;z-index:10;display:none;backdrop-filter:blur(8px)}
+        .exam-hint.show{display:block}
+        .redemittel-grid{display:flex;flex-direction:column;gap:12px}
+        .redemittel-cat-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--gold);margin-bottom:6px}
+        .redemittel-cat-title .ar-cat{color:var(--ar);text-transform:none;letter-spacing:0;font-size:10px;margin-left:6px}
+        .redemittel-item{padding:6px 10px;background:var(--bg2);border-radius:var(--radius-sm);margin-bottom:3px;font-size:11px;color:var(--text-dim);line-height:1.5}
+        .redemittel-item .de-rm{color:var(--text)}
+        .redemittel-item .ar-rm{color:var(--ar);font-size:10px;margin-top:2px}
+        .exam-section{display:flex;flex-direction:column;gap:10px}
+        .exam-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+        .exam-word{font-size:20px;font-weight:800;margin-bottom:8px}
+        .exam-trans{font-size:14px;color:var(--ar);margin-bottom:12px;display:none}
+        .exam-trans.show{display:block}
+        .exam-options{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+        .exam-opt{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-family:inherit;font-size:12px;color:var(--text);cursor:pointer;transition:all .15s}
+        .exam-opt:hover{background:var(--card-hover);border-color:var(--gold)}
+        .exam-opt.correct{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+        .exam-opt.wrong{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+        .exam-opt:disabled{cursor:default;opacity:.7}
+        .exam-score{font-size:11px;color:var(--text-muted);margin-top:8px}
+        .exam-progress{height:4px;background:var(--bg2);border-radius:2px;margin-bottom:12px;overflow:hidden}
+        .exam-progress-bar{height:100%;background:var(--gold);border-radius:2px;transition:width .3s}
+        .exam-source{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+        .exam-source button{font-size:9px;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-family:inherit;font-weight:600}
+        .exam-source button.active{background:var(--gold-bg);color:var(--gold);border-color:var(--gold)}
+        .exam-source button:hover{background:var(--card-hover)}
+        .myvocab-input{display:flex;gap:6px;margin-bottom:10px}
+        .myvocab-input input{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:12px;padding:8px 10px;outline:none}
+        .myvocab-input input:focus{border-color:var(--gold)}
+        .myvocab-list{display:flex;flex-direction:column;gap:4px}
+        .myvocab-item{display:flex;justify-content:space-between;align-items:center;background:var(--bg2);border-radius:var(--radius-sm);padding:8px 10px}
+        .myvocab-item .vw-de{font-weight:600;font-size:12px}
+        .myvocab-item .vw-ar{color:var(--ar);font-size:11px}
+        .myvocab-item .vw-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px}
+        .myvocab-count{font-size:10px;color:var(--text-muted);margin-bottom:8px}
+        .add-btn{background:var(--gold);color:#000;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+        .add-btn:hover{filter:brightness(1.1)}
+        .section-title{cursor:pointer;user-select:none}
+        .section-title .toggle-icon{display:inline-block;transition:transform .2s;margin-right:3px;font-size:9px}
+        .section-title .toggle-icon.open{transform:rotate(90deg)}
+        .section-content{display:none}
+        .section-content.open{display:block}
+        .save-section-btn{font-size:9px;padding:2px 8px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-family:inherit;margin-left:8px;transition:all .15s;font-weight:600}
+        .save-section-btn:hover{background:var(--gold-bg);color:var(--gold);border-color:var(--gold-dim)}
+        .vocab-save{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:0 6px;transition:color .15s}
+        .vocab-save:hover{color:var(--green)}
+        .review-card{background:var(--bg2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:6px;border-left:3px solid var(--violet)}
+        .review-card .rc-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--violet);margin-bottom:3px}
+        .review-card .rc-text{font-size:11px;color:var(--text-dim);line-height:1.5}
+        .review-card .rc-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;float:right;padding:0 4px}
+        .review-tabs{display:flex;gap:3px;margin-bottom:10px;background:var(--bg2);border-radius:var(--radius-sm);padding:3px}
+        .review-tab{flex:1;padding:6px 4px;text-align:center;border:none;background:transparent;color:var(--text-muted);font-family:inherit;font-size:10px;font-weight:600;border-radius:6px;cursor:pointer;transition:all .15s}
+        .review-tab.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+        .vocab-cat{margin-bottom:10px}
+        .vocab-cat-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s}
+        .vocab-cat-header:hover{border-color:var(--border-active)}
+        .vocab-cat-header .vcat-icon{font-size:16px}
+        .vocab-cat-header .vcat-title{font-size:11px;font-weight:600;flex:1}
+        .vocab-cat-header .vcat-count{font-size:9px;color:var(--text-muted)}
+        .vocab-cat-header .vcat-arrow{font-size:9px;color:var(--text-muted);transition:transform .2s}
+        .vocab-cat-header.open .vcat-arrow{transform:rotate(90deg)}
+        .vocab-cat-body{display:none;margin-top:4px;padding-left:4px}
+        .vocab-cat-body.open{display:block}
+        .vword{background:var(--bg2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:4px;border-left:3px solid var(--violet)}
+        .vword .vw-de{font-size:12px;font-weight:700;color:var(--text)}
+        .vword .vw-ar{font-size:11px;color:var(--ar);margin-top:1px}
+        .vword .vw-ctx{font-size:10px;color:var(--text-muted);margin-top:4px;font-style:italic;line-height:1.4}
+        .vword .vw-ex{font-size:11px;color:var(--text-dim);margin-top:3px;line-height:1.4;padding:6px 8px;background:var(--card);border-radius:4px}
+        .vword .vw-ex-ar{font-size:10px;color:var(--ar);margin-top:2px;line-height:1.3}
+        @media(max-width:480px){.app{padding:10px 6px 80px}.stats-row{grid-template-columns:repeat(2,1fr)}.tab{font-size:9px;min-width:42px;padding:9px 2px}.tabs{padding:3px;gap:1px}.stat{padding:6px 2px}.stat-num{font-size:14px}.theme-item{padding:10px}.theme-title{font-size:11px}.section-title{font-size:9px}.de-text{font-size:11px;padding:10px 12px}.detail-title-de{font-size:14px}}
+    </style>
+</head>
+<body>
+<div class="app" id="app">
+    <header class="header">
+        <div>
+            <div class="logo">B2 <span>Prüfung</span> &nbsp;<span style="font-weight:400;font-size:12px">🇩🇪 + 🇸🇦</span></div>
+            <div class="logo-sub">Inhalt · Meinung · Erfahrung · Quiz</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+            <button class="exam-btn" id="examBtn" onclick="toggleExam()">🎯 Prüfung</button>
+            <span class="badge" id="countDone">0/38</span>
+        </div>
+    </header>
+    <div class="stats-row">
+        <div class="stat"><div class="stat-num" style="color:var(--gold)" id="statLearned">0</div><div class="stat-label">Gelernt</div></div>
+        <div class="stat"><div class="stat-num" style="color:var(--violet)" id="statVocab">0</div><div class="stat-label">Vokabeln</div></div>
+        <div class="stat"><div class="stat-num" style="color:var(--blue)" id="statPhrases">0</div><div class="stat-label">Sätze</div></div>
+        <div class="stat"><div class="stat-num" style="color:var(--green)" id="statStreak">0</div><div class="stat-label">Serie</div></div>
+    </div>
+    <div class="tabs" id="mainTabs">
+        <button class="tab active" data-tab="themes" onclick="switchTab('themes')">📚 Themen</button>
+        <button class="tab" data-tab="problems" onclick="switchTab('problems')">💡 Problemlösung</button>
+        <div class="tab-group-divider"></div>
+        <button class="tab" data-tab="phrases" onclick="switchTab('phrases')">🗣️ Redemittel</button>
+        <button class="tab" data-tab="myvocab" onclick="switchTab('myvocab')">📝 Meine Vokabeln</button>
+        <button class="tab" data-tab="quiz" onclick="switchTab('quiz')">🧠 Quiz</button>
+        <button class="tab" data-tab="vocab" onclick="switchTab('vocab')">🗂️ Wortschatz</button>
+    </div>
+    <div class="search-wrap" id="searchWrap">
+        <span class="search-icon">🔍</span>
+        <input id="searchInput" placeholder="Suchen..." oninput="filterThemes()">
+    </div>
+    <div id="themeListView"><div class="theme-grid" id="themeGrid"></div></div>
+    <div class="detail-view" id="detailView">
+        <div class="detail-header">
+            <button class="detail-back" onclick="closeDetail()">←</button>
+            <div>
+                <div class="detail-title-de" id="detailTitleDe"></div>
+                <div class="detail-title-ar" id="detailTitleAr"></div>
+            </div>
+            <div class="theme-check" id="detailCheck" onclick="toggleDone()"></div>
+        </div>
+        <div id="detailContent"></div>
+    </div>
+</div>
+<div class="exam-hint" id="examHint">🎯 Prüfungsmodus aktiv – Arabisch versteckt. Klick nochmal zum Anzeigen.</div>
+<script>
+// ============================================================
+// MEINUNG + ERFAHRUNG Data (added as patch to keep b2-data.js clean)
+// ============================================================
+const THEME_EXTRA = {
+1:{meinungDe:"Ich finde die Kinderuniversität sinnvoll, weil sie Kinder früh an Wissenschaft heranführt. Allerdings sollte Bewegung und Freizeit nicht zu kurz kommen.",meinungAr:"أجد جامعة الأطفال مفيدة لأنها تقرب الأطفال من العلم مبكراً. لكن يجب ألا تقل أهمية الرياضة والترفيه.",erfahrungDe:"Mein Neffe war einmal in einem Kinderuni-Kurs zum Thema Weltall und war total begeistert. Er wollte danach Astronaut werden.",erfahrungAr:"شارك ابن أختي مرة في دورة أطفال عن الفضاء وكان متحمساً جداً. أراد بعدها أن يصبح رائد فضاء."},
+2:{meinungDe:"Ich halte das Wohnen in einer WG im Alter für eine gute Alternative. Die Gemeinschaft beugt Einsamkeit vor. Niemand sollte aus Kostengründen in eine WG gesteckt werden.",meinungAr:"أرى العيش في WG في الكبر بديلاً جيداً. المجتمع يمنع الوحدة. لا ينبغي إجبار أحد على WG لأسباب مالية.",erfahrungDe:"Meine Großmutter ist mit 78 in eine WG gezogen. Anfangs skeptisch, heute genießt sie das gemeinsame Leben sehr.",erfahrungAr:"انتقلت جدتي إلى WG في 78. كانت متشككة في البداية، لكنها اليوم تستمتع بالحياة المشتركة."},
+3:{meinungDe:"Fast Food ist in Maßen in Ordnung. Die Studie zeigt aber, wie gefährlich übermäßiger Konsum sein kann. Aufklärung über Ernährung ist wichtig.",meinungAr:"الوجبات السريعة مقبولة باعتدال. لكن الدراسة تظهر خطورة الاستهلاك المفرط. التوعية الغذائية مهمة.",erfahrungDe:"Früher aß ich mehrmals pro Woche Fast Food. Seit ich mich gesünder ernähre, fühle ich mich viel fitter.",erfahrungAr:"كنت أكل الوجبات السريعة عدة مرات أسبوعياً. منذ أن تحسنت تغذيتي، أشعر بلياقة أفضل."},
+4:{meinungDe:"Englisch als Firmensprache ist praktisch, aber die Muttersprache der Mitarbeiter sollte nicht verschwinden. Denkmuster hängen eng mit Sprache zusammen.",meinungAr:"الإنجليزية كلغة شركات عملية، لكن اللغة الأم يجب ألا تختفي. أنماط التفكير مرتبطة باللغة.",erfahrungDe:"In meinem letzten Praktikum war Englisch die Firmensprache. Anfangs hatte ich Hemmungen, aber nach Wochen wurde es natürlich.",erfahrungAr:"في تدريبي السابق كانت الإنجليزية لغة الشركة. كنت خجولاً في البداية لكنه أصبح طبيعياً بعد أسابيع."},
+5:{meinungDe:"Trinkgeld ist eine nette Geste, sollte aber freiwillig bleiben. 5-10% sind in Deutschland üblich. Es ist unfair, wenn Trinkgeld erwartet wird.",meinungAr:"الإكرامية لفتة جميلة لكن يجب أن تبقى اختيارية. 5-10% معتادة في ألمانيا. توقعها غير منصف.",erfahrungDe:"Als Kellner in Berlin war ich auf Trinkgeld angewiesen, weil der Grundlohn niedrig war. Wichtige Erfahrung.",erfahrungAr:"كنت أعتمد على الإكرامية كنادل في برلين لأن الراتب كان منخفضاً. تجربة مهمة."},
+6:{meinungDe:"Blutspenden rettet Leben. Es ist schnell und unkompliziert. Mehr Menschen sollten sich trauen. Ich spende regelmäßig.",meinungAr:"التبرع بالدم ينقذ الأرواح. سريع وبسيط. يجب أن يتشجع المزيد. أتبرع بانتظام.",erfahrungDe:"Letztes Jahr spendete ich zum ersten Mal Blut. Ich war nervös, aber es tat nicht weh und das Team war nett.",erfahrungAr:"تبرعت بالدم لأول مرة السنة الماضية. كنت متوتراً لكنه لم يؤلم والفريق كان لطيفاً."},
+7:{meinungDe:"Ich bin strikt gegen Rauchen. Es schadet dem Raucher und den Mitmenschen. Aufklärung in Schulen sollte früher beginnen.",meinungAr:"أنا ضد التدخين بشدة. يضر المدخن والمحيطين. يجب أن تبدأ التوعية مبكراً في المدارس.",erfahrungDe:"Mein Onkel begann mit 14 zu rauchen und bekam mit 50 Lungenkrebs. Das hat mich geprägt – ich rauche nicht.",erfahrungAr:"بدأ عمي التدخين في 14 وأصيب بسرطان الرئة في 50. أثر في كثيراً ولم أدخن أبداً."},
+8:{meinungDe:"Fernsehen ist nicht per se schlecht, die Menge macht den Unterschied. Eltern sollten mit Kindern Sendungen auswählen.",meinungAr:"التلفاز ليس سيئاً بذاته، الكمية هي الفارق. على الآباء اختيار البرامج مع الأطفال.",erfahrungDe:"Meine Eltern erlaubten mir als Kind eine Stunde Fernsehen täglich. Das fand ich fair und lernte bewusst zu wählen.",erfahrungAr:"سمح لي والداي بساعة تلفاز يومياً في الطفولة. وجدتها عادلة وتعلمت الاختيار بوعي."},
+9:{meinungDe:"Fernsehen kann bilden, wenn man bewusst wählt. Dokumentationen sind eine gute Ergänzung zum Unterricht.",meinungAr:"التلفاز يعلم إذا اخترت بوعي. الوثائقيات تكملة جيدة للتعليم المدرسي.",erfahrungDe:"Dokus über Natur und Technik weckten mein Interesse an Biologie. Ohne sie hätte ich nie Biologie studiert.",erfahrungAr:"الوثائقيات عن الطبيعة أيقظت اهتمامي بالأحياء. بدونها ما كنت لأدرس علم الأحياء."},
+10:{meinungDe:"Tiere sollte man nicht spontan verschenken. Ein Tier ist jahrelange Verantwortung. Wer ein Tier möchte, sollte sich gut informieren.",meinungAr:"لا أهدِ حيواناً بشكل عفوي. الحيوان مسؤولية لسنوات. من يريد حيواناً فليستعد جيداً.",erfahrungDe:"Meine Cousine bekam zu Weihnachten einen Hamster. Nach drei Monaten gaben die Eltern ihn weg. Traurig.",erfahrungAr:"حصلت ابنة عمي على هامستر في الكريسماس. تخلص منه الوالدان بعد 3 أشهر. محزن."},
+11:{meinungDe:"Klassenfahrten sind sehr wertvoll. Sie stärken die Gemeinschaft. Die Schule sollte durch Zuschüsse allen die Teilnahme ermöglichen.",meinungAr:"الرحلات المدرسية قيّمة جداً. تقوي روح الفصل. على المدرسة تمكين الجميع بالمشاركة عبر الدعم.",erfahrungDe:"Meine beste Klassenfahrt war in der 9. Klasse nach Berlin. Das hat uns als Klasse zusammengeschweißt.",erfahrungAr:"أفضل رحلة كانت في الصف التاسع إلى برلين. وحدتنا كفصل."},
+12:{meinungDe:"Praktika sind wichtig für den Berufseinstieg, sollten aber fair vergütet werden. Unbezahlte Praktika sind ungerecht.",meinungAr:"التدريبات مهمة لدخول سوق العمل، يجب تعويضها. التدريب غير المدفوع غير عادل.",erfahrungDe:"Nach dem Studium arbeitete ich ein halbes Jahr unbezahlt als Praktikant. Tolle Erfahrung, finanziell eine Katastrophe.",erfahrungAr:"عملت نصف سنة كمتدرب غير مدفوع بعد التخرج. تجربة رائعة وكارثة مالية."},
+13:{meinungDe:"Ich rate von Solarien ab. Die Risiken sind zu hoch. Besser Vitamin-D-Tabletten oder Tageslichtlampen.",meinungAr:"أنصح بعدم استخدام صالات الاستلقاء. المخاطر كبيرة. الأفضل أقراص فيتامين د أو مصابيح ضوء النهار.",erfahrungDe:"Eine Freundin ging regelmäßig ins Solarium und bekam mit 30 Hautkrebs. Das hat mir die Augen geöffnet.",erfahrungAr:"صديقة كانت تذهب لصالة الاستلقاء بانتظام، أصيبت بسرطان الجلد في 30. فتح عيني."},
+14:{meinungDe:"Lachen ist die beste Medizin. Erwachsene sollten mehr lachen wie Kinder. Humor hilft in stressigen Situationen.",meinungAr:"الضحك أفضل دواء. على البالغين الضحك أكثر مثل الأطفال. الفكاهة تساعد في التوتر.",erfahrungDe:"Seit ich wöchentlich einen Comedy-Club besuche, fühle ich mich ausgeglichener und schlafe besser.",erfahrungAr:"منذ أزور نادي كوميديا أسبوعياً، أشعر بتوازن وأنام أفضل."},
+15:{meinungDe:"Ich koche gerne selbst. Es braucht Zeit, aber schmeckt besser und ist gesünder. Fertiggerichte sind nur eine Notlösung.",meinungAr:"أحب الطبخ بنفسي. يحتاج وقتاً لكنه أطعم وأصح. الوجبات الجاهزة مجرد حل اضطرار.",erfahrungDe:"Seit ich wöchentlich Meal-Prep mache, spare ich Zeit und koche trotzdem frisch. Sonntags für 3 Tage vorkochen.",erfahrungAr:"منذ بدأت Meal-Prep أسبوعياً، أوفر الوقت ومازلت أطبخ طازجاً. الأحد أحضر طعام 3 أيام."},
+16:{meinungDe:"Eine flexible Rente ist der beste Kompromiss. Wer länger arbeiten kann, sollte das dürfen. Niemand sollte gezwungen werden.",meinungAr:"التقاعد المرن أفضل حل وسط. من يستطيع العمل لفترة أطول، فليفعل. لا إجبار.",erfahrungDe:"Mein Vater hörte mit 65 auf und war unglücklich. Mit einem Minijob wurde er viel zufriedener.",erfahrungAr:"توقف والدي عن العمل في 65 وكان غير سعيد. بعمل بسيط أصبح أكثر رضا."},
+17:{meinungDe:"Ich bin eher gegen Schuluniformen. Kinder sollten Toleranz auch ohne Kleiderordnung lernen. Uniformen kaschieren Probleme nur.",meinungAr:"أميل ضد الزي المدرسي. الأطفال يتعلمون التسامح بدون قواعد لباس. الزي يخفي المشاكل فقط.",erfahrungDe:"In meiner Schule gab es keine Uniform, aber niemand wurde wegen Kleidung gemobbt. Die Lehrer achteten auf ein gutes Klima.",erfahrungAr:"في مدرستي لم يكن هناك زي موحد، لكن لم يتنمر أحد بسبب الملابس. المعلمون اهتموا بالمناخ."},
+18:{meinungDe:"Doping ist inakzeptabel. Es ist unfair und zerstört die Glaubwürdigkeit des Sports. Strengere Kontrollen sind nötig.",meinungAr:"المنشطات غير مقبولة. غير عادلة وتدمر مصداقية الرياضة. تشديد الرقابة ضروري.",erfahrungDe:"Ein Bekannter dopte als Hobbyradfahrer und bekam später Herzprobleme. Das zeigte mir die Gefahr.",erfahrungAr:"أحد معارفي تعاطى المنشطات كهواة وأصيب بمشاكل قلب. أراني الخطر."},
+19:{meinungDe:"Eltern und Jugendliche sollten Ausgehzeiten gemeinsam besprechen. Feste Regeln geben Halt, zu viel Kontrolle zerstört Vertrauen.",meinungAr:"على الآباء والمراهقين الاتفاق على أوقات الخروج. القواعد تعطي دعماً، السيطرة المفرطة تدمر الثقة.",erfahrungDe:"Meine Eltern erlaubten mir mit 16 bis 22 Uhr auszugehen, wenn Hausaufgaben erledigt waren. Fairer Deal.",erfahrungAr:"سمح لي والداي في 16 بالخروج حتى 22:00 بعد الواجبات. صفقة عادلة."},
+20:{meinungDe:"Antibiotika sind ein Segen, aber sie werden zu oft verschrieben. Heilpflanzen sind eine gute Alternative bei leichten Infekten.",meinungAr:"المضادات الحيوية نعمة لكنها توصف كثيراً. النباتات الطبية بديل جيد للالتهابات الخفيفة.",erfahrungDe:"Früher nahm ich Antibiotika bei jeder Erkältung. Jetzt nur noch, wenn es wirklich nötig ist.",erfahrungAr:"كنت أتناول المضادات لكل برد. الآن فقط عند الضرورة."},
+21:{meinungDe:"Haustausch ist eine tolle Sache für günstiges Reisen. Man sollte aber einen Vertrag machen, um rechtlich abgesichert zu sein.",meinungAr:"تبادل المنازل رائع للسفر الرخيص. يجب عمل عقد للضمان القانوني.",erfahrungDe:"Letzten Sommer tauschte ich meine Wohnung gegen eine in Barcelona. Es hat reibungslos geklappt.",erfahrungAr:"الصيف الماضي بادلت شقتي بشقة في برشلونة. كل شيء سار بسلاسة."},
+22:{meinungDe:"Zweisprachigkeit ist ein großer Vorteil. Kinder sollten früh beide Sprachen lernen. Eltern sollten konsequent sein.",meinungAr:"ثنائية اللغة ميزة كبيرة. الأطفال يتعلمون مبكراً. على الآباء أن يكونوا منتظمين.",erfahrungDe:"Ich bin zweisprachig aufgewachsen (Deutsch und Arabisch). Heute bin ich sehr dankbar dafür, besonders im Beruf.",erfahrungAr:"نشأت ثنائي اللغة (ألمانية وعربية). أنا ممتن جداً لذلك، خاصة في العمل."},
+23:{meinungDe:"Jedes Paar sollte selbst entscheiden, wie es heiraten möchte. Eine kleine Hochzeit kann sehr schön und intim sein.",meinungAr:"كل زوجين يقرران بأنفسهما كيف يتزوجان. الزفاف الصغير يمكن أن يكون جميلاً وحميمياً.",erfahrungDe:"Ein befreundetes Paar heiratete heimlich auf dem Standesamt. Die Familie war anfangs sauer, akzeptierte es aber später.",erfahrungAr:"تزوج أصدقاء سراً في مكتب الأحوال. العائلة غضبت أولاً ثم تقبلت."},
+24:{meinungDe:"Schönheitsoperationen bei Minderjährigen sollten verboten werden. Der Körper ist noch in Entwicklung. Selbstakzeptanz ist wichtiger.",meinungAr:"عمليات التجميل للقاصرين يجب أن تحظر. الجسم لا يزال في نمو. تقبل الذات أهم.",erfahrungDe:"Meine Schwester wollte mit 16 eine Nasenkorrektur. Nach einem Gespräch mit den Eltern ließ sie es. Heute ist sie froh.",erfahrungAr:"أرادت أختي في 16 تجميل الأنف. بعد التحدث مع والديها تركت الفكرة. اليوم سعيدة."},
+25:{meinungDe:"Ganztagsschulen entlasten berufstätige Eltern. Die Nachmittagsangebote müssen qualitativ hochwertig sein.",meinungAr:"مدارس اليوم الكامل تخفف عن الآباء العاملين. عروض ما بعد الظهر يجب أن تكون عالية الجودة.",erfahrungDe:"Meine Nichte liebt die AGs in ihrer Ganztagsschule. Sie macht Theater und Kochen.",erfahrungAr:"ابنة أخي تحب الأنشطة في مدرستها. تمارس المسرح والطبخ."},
+26:{meinungDe:"Ein Verbot von Gewaltspielen ist der falsche Weg. Die Ursachen von Gewalt sind komplexer. Eltern sollten mit Kindern sprechen.",meinungAr:"حظر ألعاب العنف طريق خطأ. أسباب العنف أكثر تعقيداً. على الآباء التحدث مع أطفالهم.",erfahrungDe:"Ich spielte als Teenager gewalttätige Spiele, bin aber friedlich geworden. Das Umfeld war entscheidender.",erfahrungAr:"لعبت ألعاب عنف في مراهقتي لكنني أصبحت مسالماً. البيئة كانت الأهم."},
+27:{meinungDe:"Die Multikanal-Methode kann ich empfehlen. Lautes Sprechen und Zusammenfassen halfen mir sehr beim Deutschlernen.",meinungAr:"أنصح بطريقة القنوات المتعددة. التحدث بصوت عال والتلخيص ساعداني في تعلم الألمانية.",erfahrungDe:"Beim Deutschlernen sprach ich Vokabeln laut aus und schrieb sie auf. Das half mehr als stilles Lesen.",erfahrungAr:"في تعلم الألمانية، نطقت المفردات بصوت عال وكتبتها. أفاد أكثر من القراءة الصامتة."},
+28:{meinungDe:"Convenience Food ist in Maßen okay. Man sollte aber zumindest ein paar einfache Gerichte selbst kochen können.",meinungAr:"الطعام المريح مقبول باعتدال. لكن على المرء معرفة طبخ بعض الأطباق البسيطة.",erfahrungDe:"In der Prüfungszeit lebte ich von Fertigpizza und war müde und schlapp. Seit ich frisch koche, geht es mir besser.",erfahrungAr:"في الامتحانات عشت على البيتزا الجاهزة. كنت متعباً. منذ أطبخ طازجاً، صحتي أفضل."},
+29:{meinungDe:"Man sollte immer versuchen, den Eigentümer zu finden. Ehrlichkeit ist wichtig. Bei größeren Wertsachen ist das Fundbüro der richtige Weg.",meinungAr:"على المرء دائماً إيجاد المالك. الصدق مهم. للأشياء الثمينة، مكتب المفقودات هو الطريق الصحيح.",erfahrungDe:"Ich fand eine Geldbörse mit 200 Euro und gab sie ab. Der Besitzer bedankte sich – ein gutes Gefühl.",erfahrungAr:"وجدت محفظة بـ 200 يورو وأعدتها. شكرني المالك – شعور رائع."},
+30:{meinungDe:"Hausaufgaben sind sinnvoll, aber in Maßen. Qualität vor Quantität. Nicht alle Kinder haben zu Hause Unterstützung.",meinungAr:"الواجبات المنزلية مفيدة باعتدال. الجودة قبل الكمية. ليس كل الأطفال يحصلون على مساعدة في المنزل.",erfahrungDe:"In meiner Schulzeit hatte ich stundenlange Hausaufgaben. Anstrengend und wenig bringend. Weniger, aber sinnvoller wäre besser.",erfahrungAr:"في دراستي كان لدي واجبات لساعات. مرهق وقليل الفائدة. الأفضل أقل لكن مفيد."},
+31:{meinungDe:"Ich bevorzuge das Leben in der Stadt wegen der kurzen Wege und Kultur. Für Familien mit Kindern ist das Land aber oft besser.",meinungAr:"أفضل الحياة في المدينة لقصر المسافات والثقافة. للعائلات قد يكون الريف أفضل.",erfahrungDe:"Ich wohnte 5 Jahre auf dem Land, dann in der Stadt. Auf dem Land mehr Ruhe, in der Stadt flexibler.",erfahrungAr:"عشت 5 سنوات في الريف ثم في المدينة. في الريف هدوء، في المدينة مرونة."},
+32:{meinungDe:"Es ist besorgniserregend, wie früh Kinder Handys bekommen. Eltern müssen über Risiken sprechen und Regeln aufstellen.",meinungAr:"مقلق كم يبكر حصول الأطفال على الهواتف. على الآباء التحدث عن المخاطر ووضع قواعد.",erfahrungDe:"Mein Bruder bekam mit 9 ein Handy und hatte bald Probleme mit Cybermobbing. Die Schule half.",erfahrungAr:"حصل أخي على هاتف في 9 وسرعان ما واجه تنمراً إلكترونياً. المدرسة ساعدت."},
+33:{meinungDe:"Eine Woche ohne Internet wäre heute eine Herausforderung. Es wäre trotzdem wertvoll zu sehen, wie abhängig wir sind.",meinungAr:"أسبوع بدون إنترنت سيكون تحدياً. لكنه سيكون قيماً لرؤية مدى اعتمادنا.",erfahrungDe:"Im Urlaub hatte ich eine Woche kein Internet. Anfangs schwer, dann las ich mehr und verbrachte Zeit mit Familie.",erfahrungAr:"في عطلة لم يكن لدي إنترنت أسبوعاً. صعب أولاً، ثم قرأت أكثر وقضيت وقتاً مع العائلة."},
+34:{meinungDe:"Eine Mischung aus digitalen und gedruckten Materialien ist ideal. Beides hat seine Berechtigung.",meinungAr:"مزيج المواد الرقمية والمطبوعة مثالي. لكليهما ما يبرره.",erfahrungDe:"An meiner Uni gibt es nur E-Books. Praktisch, aber ich kaufe manchmal gedruckte Bücher zum besseren Lesen.",erfahrungAr:"في جامعتي كتب إلكترونية فقط. عملي، لكني أشتري أحياناً كتباً مطبوعة للقراءة الأفضل."},
+35:{meinungDe:"Hochbegabte brauchen Förderung, aber nicht Separation. Eine Mischung aus Förderung und Integration ist ideal.",meinungAr:"الموهوبون بحاجة لدعم لا فصل. مزيج الدعم والدمج مثالي.",erfahrungDe:"In meiner Schule gab es einen separaten Hochbegabtenkurs einmal pro Woche. Das hat gut funktioniert.",erfahrungAr:"في مدرستي كان فصل للموهوبين مرة أسبوعياً. نجح جيداً."},
+36:{meinungDe:"Sparen für Kinder ist wichtig, am besten mit ETF-Sparplänen. Finanzbildung sollte auch in der Schule vermittelt werden.",meinungAr:"الادخار للأطفال مهم، أفضل عبر خطط ETF. التثقيف المالي يجب أن يدرس في المدرسة.",erfahrungDe:"Meine Eltern richteten mir ab Geburt einen ETF-Sparplan ein. Mit 18 hatte ich eine schöne Summe.",erfahrungAr:"والداي افتتحا لي خطة ETF منذ ولادتي. في 18 كان لدي مبلغ جميل."},
+37:{meinungDe:"Tierversuche sind ein ethisches Dilemma. Wir brauchen sie für medizinischen Fortschritt, aber Alternativen sollten mehr gefördert werden.",meinungAr:"تجارب الحيوانات معضلة أخلاقية. نحتاجها للتقدم الطبي، لكن البدائل يجب أن تدعم أكثر.",erfahrungDe:"Im Biologiestudium begleitete ich einen Tierversuch. Wissenschaftlich wichtig, aber ich hatte ein schlechtes Gewissen.",erfahrungAr:"في دراسة الأحياء رافقت تجربة على الحيوانات. مهم علمياً لكن ضميري كان يعذبني."},
+38:{meinungDe:"Hausfrau zu sein ist eine persönliche Entscheidung. Jede Frau sollte selbst wählen dürfen. Die Gesellschaft sollte beides akzeptieren.",meinungAr:"ربة البيت قرار شخصي. كل امرأة تختار بنفسها. على المجتمع تقبل كلا الخيارين.",erfahrungDe:"Meine Mutter war Hausfrau und sehr glücklich. Meine Schwester arbeitet Vollzeit und ist auch glücklich. Beides ist okay.",erfahrungAr:"والدتي كانت ربة بيت وسعيدة جداً. أختي تعمل دوام كامل وسعيدة أيضاً. كلا الأمرين مقبول."},
+};
+function patchThemes() {
+    THEMES.forEach(t => {
+        const e = THEME_EXTRA[t.id];
+        if (e) { t.meinungDe = e.meinungDe; t.meinungAr = e.meinungAr; t.erfahrungDe = e.erfahrungDe; t.erfahrungAr = e.erfahrungAr; }
+    });
+}
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+    done: JSON.parse(localStorage.getItem('b2_done') || '[]'),
+    tab: 'themes',
+    currentTheme: null,
+    exam: localStorage.getItem('b2_exam') === '1',
+    myVocab: JSON.parse(localStorage.getItem('b2_myvocab') || '[]'),
+    savedSections: JSON.parse(localStorage.getItem('b2_savedSections') || '[]'),
+    quiz: { source: 'all', idx: 0, correct: 0, total: 0, pool: [], answered: false }
+};
+function saveDone() { localStorage.setItem('b2_done', JSON.stringify(state.done)); }
+function saveMyVocab() { localStorage.setItem('b2_myvocab', JSON.stringify(state.myVocab)); }
+function saveMySections() { localStorage.setItem('b2_savedSections', JSON.stringify(state.savedSections)); }
+function toggleExam() {
+    state.exam = !state.exam;
+    localStorage.setItem('b2_exam', state.exam ? '1' : '0');
+    document.getElementById('examBtn').classList.toggle('on', state.exam);
+    document.getElementById('examHint').classList.toggle('show', state.exam);
+    if (state.currentTheme) openTheme(state.currentTheme.id);
+}
+function em() { return state.exam; }
+function toggleSection(el) {
+    const icon = el.querySelector('.toggle-icon');
+    const content = el.parentElement.querySelector('.section-content');
+    if (content) { content.classList.toggle('open'); if(icon) icon.classList.toggle('open'); }
+}
+function saveVocabFromTheme(de, ar, btn) {
+    if (state.myVocab.some(v => v.de === de && v.ar === ar)) return;
+    state.myVocab.push({de, ar});
+    saveMyVocab();
+    updateStats();
+    btn.textContent = '✓'; btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = '+'; btn.style.color = ''; }, 1500);
+}
+function saveSectionFromTheme(sectionId, themeId) {
+    const t = THEMES.find(x => x.id === themeId); if (!t) return;
+    const map = {
+        inhalt: { title: t.icon+' Inhalt', text: t.textDe, ar: t.textAr },
+        meinung: { title: t.icon+' Meinung', text: t.meinungDe, ar: t.meinungAr },
+        erfahrung: { title: t.icon+' Erfahrung', text: t.erfahrungDe, ar: t.erfahrungAr }
+    };
+    const item = map[sectionId]; if (!item || !item.text) return;
+    const key = themeId+'_'+sectionId;
+    if (state.savedSections.some(s => s.key === key)) return;
+    state.savedSections.push({ key, themeId, sectionId, title: item.title, text: item.text, ar: item.ar });
+    saveMySections();
+    updateStats();
+    const btn = document.getElementById('saveSec_'+sectionId);
+    if (btn) { btn.textContent = '✓'; btn.style.color = 'var(--green)'; btn.style.borderColor = 'var(--green)';
+        setTimeout(() => { btn.textContent = '📋'; btn.style.color = ''; btn.style.borderColor = ''; }, 1500); }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+    patchThemes();
+    document.getElementById('examBtn').classList.toggle('on', state.exam);
+    updateStats();
+    render();
+}
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(tab) {
+    state.tab = tab;
+    state.currentTheme = null;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.getElementById('detailView').style.display = 'none';
+    document.getElementById('themeListView').style.display = 'block';
+    const isSearch = ['themes','problems'].includes(tab);
+    const sw = document.getElementById('searchWrap');
+    sw.style.display = isSearch ? 'block' : 'none';
+    document.getElementById('searchInput').placeholder = tab === 'problems' ? 'Aufgabe suchen...' : 'Thema suchen...';
+    if (tab === 'myvocab') { myVocabTab = 'vocab'; renderMyVocab(); }
+    else if (tab === 'quiz') initQuiz();
+    else if (tab === 'phrases') renderPhrases();
+    else if (tab === 'vocab') renderVocab();
+    else render();
+}
+function filterThemes() { render(); }
+// ============================================================
+// RENDER HELPERS
+// ============================================================
+function langSpan(de, ar){
+    if(em()) return `<div class="de-text">${de}</div>`;
+    return `<div class="de-text">${de}</div><div class="ar-text">${ar}</div>`;
+}
+function argCard(cls, de, ar){
+    if(em()) return `<div class="arg-card ${cls}"><div class="de-arg">${de}</div></div>`;
+    return `<div class="arg-card ${cls}"><div class="de-arg">${de}</div><div class="ar-arg">${ar}</div></div>`;
+}
+function phraseBlock(de, ar){
+    if(em()) return `<div class="phrase-item"><div class="de-phrase">${de}</div></div>`;
+    return `<div class="phrase-item"><div class="de-phrase">${de}</div><div class="ar-phrase">${ar}</div></div>`;
+}
+function ideaBlock(de, ar){
+    if(em()) return `<div class="idea-item"><div class="de-idea">${de}</div></div>`;
+    return `<div class="idea-item"><div class="de-idea">${de}</div><div class="ar-idea">${ar}</div></div>`;
+}
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+    updateStats();
+    if (state.tab === 'themes') renderThemes();
+    else if (state.tab === 'problems') renderProblems();
+}
+function updateStats() {
+    document.getElementById('statLearned').textContent = state.done.length;
+    document.getElementById('countDone').textContent = state.done.length + '/' + THEMES.length;
+    let tv = 0; THEMES.forEach(t => { if(t.vocab) tv += t.vocab.length; });
+    document.getElementById('statVocab').textContent = tv + state.myVocab.length;
+    let tp = 0; REDEMITTEL.forEach(c => tp += c.items.length);
+    document.getElementById('statPhrases').textContent = tp + state.savedSections.length;
+    document.getElementById('statStreak').textContent = localStorage.getItem('b2_streak') || 0;
+}
+function renderThemes() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = THEMES.filter(t => t.titleDe.toLowerCase().includes(q) || t.titleAr.toLowerCase().includes(q));
+    const grid = document.getElementById('themeGrid');
+    if (!filtered.length) { grid.innerHTML = '<div class="empty-state"><div class="big">🔍</div>Kein Thema gefunden.</div>'; return; }
+    grid.innerHTML = filtered.map(t => {
+        const done = state.done.includes(t.id);
+        return `<div class="theme-item ${done?'done':''}" onclick="openTheme(${t.id})">
+            <div class="theme-check ${done?'done':''}" onclick="event.stopPropagation();toggleDone(${t.id})">${done?'✓':''}</div>
+            <div class="theme-icon">${t.icon}</div>
+            <div class="theme-info"><div class="theme-title">${t.titleDe}</div><div class="theme-sub">${t.titleAr}</div></div>
+            <div class="theme-tag">${t.id}</div>
+        </div>`;
+    }).join('');
+}
+function renderProblems() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = THEMES.filter(t => t.problem && (t.problem.titleDe.toLowerCase().includes(q) || t.problem.titleAr.toLowerCase().includes(q)));
+    const grid = document.getElementById('themeGrid');
+    if (!filtered.length) { grid.innerHTML = '<div class="empty-state"><div class="big">💡</div>Keine Aufgabe gefunden.</div>'; return; }
+    grid.innerHTML = filtered.map(t =>
+        `<div class="theme-item" onclick="openProblem(${t.id})">
+            <div class="theme-icon">${t.icon}</div>
+            <div class="theme-info"><div class="theme-title">${t.problem.titleDe}</div><div class="theme-sub">${t.titleDe}</div></div>
+        </div>`
+    ).join('');
+}
+function renderPhrases() {
+    const grid = document.getElementById('themeGrid');
+    let html = '<div class="redemittel-grid">';
+    REDEMITTEL.forEach((cat, i) => {
+        const ac = REDEMITTEL_AR[i];
+        html += `<div><div class="redemittel-cat-title">${cat.cat}${em()?'':' <span class="ar-cat">('+ac.cat+')</span>'}</div>`;
+        cat.items.forEach((item, j) => { html += phraseBlock(item, ac.items[j]); });
+        html += `</div>`;
+    });
+    html += '</div>';
+    grid.innerHTML = html;
+}
+// ============================================================
+// DETAIL VIEW
+// ============================================================
+function collapsibleSection(title, content, sectionId, themeId) {
+    const saveBtn = sectionId ? `<span class="save-section-btn" id="saveSec_${sectionId}" onclick="event.stopPropagation();saveSectionFromTheme('${sectionId}',${themeId})">📋</span>` : '';
+    return `<div class="section collapsible">
+        <div class="section-title" onclick="toggleSection(this)">
+            <span class="toggle-icon">▶</span> ${title}${saveBtn}
+        </div>
+        <div class="section-content">${content}</div>
+    </div>`;
+}
+function openTheme(id) {
+    const t = THEMES.find(x => x.id === id);
+    if (!t) return;
+    state.currentTheme = t;
+    document.getElementById('themeListView').style.display = 'none';
+    document.getElementById('detailView').style.display = 'block';
+    document.getElementById('detailTitleDe').textContent = t.icon + ' ' + t.titleDe;
+    document.getElementById('detailTitleAr').textContent = t.titleAr;
+    const chk = document.getElementById('detailCheck');
+    chk.className = 'theme-check' + (state.done.includes(t.id) ? ' done' : '');
+    chk.textContent = state.done.includes(t.id) ? '✓' : '';
+    let html = '';
+    // Text
+    html += collapsibleSection('📄 Inhalt', langSpan(t.textDe, t.textAr), 'inhalt', t.id);
+    // Meinung
+    if (t.meinungDe) {
+        html += collapsibleSection('💬 Meinung', langSpan(t.meinungDe, t.meinungAr), 'meinung', t.id);
+    }
+    // Erfahrung
+    if (t.erfahrungDe) {
+        html += collapsibleSection('📖 Erfahrung', langSpan(t.erfahrungDe, t.erfahrungAr), 'erfahrung', t.id);
+    }
+    // Vocab
+    if (t.vocab && t.vocab.length) {
+        let vh = '<ul class="vocab-list">';
+        t.vocab.forEach(v => {
+            const saved = state.myVocab.some(s => s.de === v.de && s.ar === v.ar);
+            vh += `<li class="vocab-item"><span class="vocab-de">${v.de}</span>${em()?'':'<span class="vocab-ar">'+v.ar+'</span>'}<button class="vocab-save" onclick="saveVocabFromTheme('${v.de.replace(/'/g,"\\'")}','${v.ar.replace(/'/g,"\\'")}',this)" ${saved?'disabled':''}>${saved?'✓':'+'}</button></li>`;
+        });
+        vh += '</ul>';
+        html += collapsibleSection('📝 Wortschatz', vh);
+    }
+    // Pro
+    if (t.proDe && t.proDe.length) {
+        let ph = '<div class="arg-list">';
+        t.proDe.forEach((a, i) => { ph += argCard('pro', a, t.proAr[i]); });
+        ph += '</div>';
+        html += collapsibleSection('✅ Pro-Argumente', ph);
+    }
+    // Contra
+    if (t.contraDe && t.contraDe.length) {
+        let ch = '<div class="arg-list">';
+        t.contraDe.forEach((a, i) => { ch += argCard('contra', a, t.contraAr[i]); });
+        ch += '</div>';
+        html += collapsibleSection('❌ Contra-Argumente', ch);
+    }
+    // Phrases
+    if (t.phrasesDe && t.phrasesDe.length) {
+        let rh = '';
+        t.phrasesDe.forEach((p, i) => { rh += phraseBlock(p, t.phrasesAr[i]); });
+        html += collapsibleSection('💬 Redemittel', rh);
+    }
+    // Problem
+    if (t.problem) {
+        let ph = '';
+        if(em()){
+            ph += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-text-de">${t.problem.textDe}</div></div>`;
+        } else {
+            ph += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-title-ar">${t.problem.titleAr}</div><div class="ps-text-de">${t.problem.textDe}</div><div class="ps-text-ar">${t.problem.textAr}</div></div>`;
+        }
+        if (t.problemIdeasDe) {
+            if(!em()) ph += `<div style="font-size:10px;color:var(--text-muted);font-weight:600;margin:6px 0 4px">Ideen / الأفكار:</div>`;
+            t.problemIdeasDe.forEach((idea, i) => { ph += ideaBlock(idea, t.problemIdeasAr[i]); });
+        }
+        html += collapsibleSection('🧩 Problemlösung', ph);
+    }
+    // Q&A
+    html += `<div class="qa-area"><details><summary>💡 Frage zu diesem Thema stellen</summary>
+        <div class="qa-input-wrap">
+            <input class="qa-input" id="qaInput" placeholder="z.B. Pro?, Contra?, Vokabeln?, Meinung?" onkeydown="if(event.key==='Enter')askQuestion()">
+            <button class="qa-btn" onclick="askQuestion()">Fragen</button>
+        </div>
+        <div class="qa-hint">💡 Pro / Contra / Vokabeln / Meinung / Text / Lösung</div>
+        <div class="qa-question" id="qaQuestion"></div>
+        <div class="qa-answer" id="qaAnswer"></div>
+    </details></div>`;
+    document.getElementById('detailContent').innerHTML = html;
+}
+function openProblem(id) {
+    const t = THEMES.find(x => x.id === id);
+    if (!t || !t.problem) return;
+    state.currentTheme = t;
+    document.getElementById('themeListView').style.display = 'none';
+    document.getElementById('detailView').style.display = 'block';
+    document.getElementById('detailTitleDe').textContent = t.icon + ' ' + t.problem.titleDe;
+    document.getElementById('detailTitleAr').textContent = t.problem.titleAr;
+    document.getElementById('detailCheck').style.display = 'none';
+    let html = '';
+    // Scenario
+    html += `<div class="section"><div class="section-title" style="color:var(--blue);text-transform:none;letter-spacing:0">🧩 Aufgabe</div>`;
+    if(em()){
+        html += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-text-de">${t.problem.textDe}</div></div>`;
+    } else {
+        html += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-title-ar">${t.problem.titleAr}</div><div class="ps-text-de">${t.problem.textDe}</div><div class="ps-text-ar">${t.problem.textAr}</div></div>`;
+    }
+    html += `</div>`;
+    // Ideas
+    if (t.problemIdeasDe) {
+        let ih = `<div class="section"><div class="section-title" style="color:var(--blue);text-transform:none;letter-spacing:0">💡 Ideen</div>`;
+        t.problemIdeasDe.forEach((idea, i) => { ih += ideaBlock(idea, t.problemIdeasAr[i]); });
+        ih += `</div>`;
+        html += ih;
+    }
+    // Link to full theme
+    html += `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);text-align:center">
+        <button class="add-btn" onclick="openTheme(${t.id})">📚 Zum ganzen Thema</button>
+    </div>`;
+    document.getElementById('detailContent').innerHTML = html;
+}
+function closeDetail() {
+    document.getElementById('detailView').style.display = 'none';
+    document.getElementById('themeListView').style.display = 'block';
+    state.currentTheme = null;
+    const chk = document.getElementById('detailCheck');
+    chk.style.display = '';
+}
+// ============================================================
+// DONE
+// ============================================================
+function toggleDone(id) {
+    const tid = id || (state.currentTheme && state.currentTheme.id);
+    if (!tid) return;
+    const idx = state.done.indexOf(tid);
+    if (idx > -1) state.done.splice(idx, 1); else state.done.push(tid);
+    saveDone();
+    if (id) render();
+    else if (state.currentTheme) {
+        const chk = document.getElementById('detailCheck');
+        chk.className = 'theme-check' + (state.done.includes(tid) ? ' done' : '');
+        chk.textContent = state.done.includes(tid) ? '✓' : '';
+    }
+    updateStats();
+}
+// ============================================================
+// Q&A
+// ============================================================
+function askQuestion() {
+    const input = document.getElementById('qaInput');
+    const q = input.value.trim();
+    if (!q) return;
+    const t = state.currentTheme;
+    const ql = q.toLowerCase();
+    let answer = '';
+    if (ql.includes('text')||ql.includes('inhalt')||ql.includes('worüber')||ql.includes('zusammenfass'))
+        answer = em() ? `Text: ${t.textDe}` : `Text: ${t.textDe} / ${t.textAr}`;
+    else if (ql.includes('pro')||ql.includes('vorteil')||ql.includes('dafür'))
+        answer = 'Pro: '+(t.proDe||[]).join(' • ');
+    else if (ql.includes('contra')||ql.includes('nachteil')||ql.includes('dagegen'))
+        answer = 'Contra: '+(t.contraDe||[]).join(' • ');
+    else if (ql.includes('vokabel')||ql.includes('wort'))
+        answer = 'Vokabeln: '+(t.vocab||[]).map(v=>v.de+(em()?'':' ('+v.ar+')')).join(', ');
+    else if (ql.includes('meinung')||ql.includes('findest')||ql.includes('denkst'))
+        answer = t.meinungDe || 'Keine Meinung verfügbar.';
+    else if (ql.includes('erfahrung')||ql.includes('erlebnis'))
+        answer = t.erfahrungDe || 'Keine Erfahrung verfügbar.';
+    else if (ql.includes('redemittel')||ql.includes('satz')||ql.includes('phras'))
+        answer = 'Redemittel: '+(t.phrasesDe||[]).join(' • ');
+    else if (ql.includes('lösung')||ql.includes('aufgabe')||ql.includes('ideen'))
+        answer = t.problem ? `Aufgabe: ${t.problem.titleDe}. Ideen: ${(t.problemIdeasDe||[]).join(', ')}` : 'Keine Aufgabe.';
+    else if (ql.includes('übersetz')||ql.includes('bedeutet')||ql.includes('was heißt')||ql.includes('arabisch')) {
+        const words = ql.replace(/[?.,!]/g,'').split(' ');
+        let found = [];
+        (t.vocab||[]).forEach(v => { words.forEach(w=>{ if(w.length>3&&(v.de.toLowerCase().includes(w)||v.ar.toLowerCase().includes(w))) found.push(v); }); });
+        answer = found.length ? found.map(v=>`${v.de} = ${v.ar}`).join('\n') : 'Nicht gefunden.';
+    } else {
+        const a = [];
+        if (t.proDe&&t.proDe.length) a.push('Pro: '+t.proDe[0]);
+        if (t.contraDe&&t.contraDe.length) a.push('Contra: '+t.contraDe[0]);
+        if (t.vocab&&t.vocab.length) a.push('Vokabel: '+t.vocab[0].de+(em()?'':' = '+t.vocab[0].ar));
+        answer = a.length ? a.join('. ')+'. Frag mich zu Pro, Contra, Vokabeln, Meinung oder Erfahrung!' : 'Frag mich zu diesem Thema!';
+    }
+    document.getElementById('qaQuestion').textContent = 'Frage: '+q;
+    const ans = document.getElementById('qaAnswer');
+    ans.textContent = answer; ans.classList.add('show');
+    const d = ans.closest('details'); if(d) d.open = true;
+}
+// ============================================================
+// MEINE VOKABELN
+// ============================================================
+let myVocabTab = 'vocab';
+function renderMyVocab() {
+    const grid = document.getElementById('themeGrid');
+    let html = `<div class="review-tabs">
+        <button class="review-tab ${myVocabTab==='vocab'?'active':''}" onclick="myVocabTab='vocab';renderMyVocab()">📝 Vokabeln (${state.myVocab.length})</button>
+        <button class="review-tab ${myVocabTab==='sections'?'active':''}" onclick="myVocabTab='sections';renderMyVocab()">📋 Notizen (${state.savedSections.length})</button>
+    </div>`;
+    if (myVocabTab === 'vocab') {
+        html += `
+        <div style="margin-bottom:12px">
+            <div class="myvocab-input">
+                <input id="mvDe" placeholder="Deutsch" onkeydown="if(event.key==='Enter')addVocab()">
+                <input id="mvAr" placeholder="العربية" onkeydown="if(event.key==='Enter')addVocab()">
+                <button class="add-btn" onclick="addVocab()">+ Hinzufügen</button>
+            </div>
+        </div>
+        <div class="myvocab-count">📝 ${state.myVocab.length} eigene Vokabeln</div>
+        <div class="myvocab-list">`;
+        if (!state.myVocab.length) {
+            html += '<div class="empty-state"><div class="big">📝</div>Noch keine eigenen Vokabeln. Klick + beim Wortschatz im Thema!</div>';
+        } else {
+            state.myVocab.forEach((v, i) => {
+                html += `<div class="myvocab-item">
+                    <div><div class="vw-de">${v.de}</div><div class="vw-ar">${v.ar}</div></div>
+                    <button class="vw-del" onclick="delVocab(${i})">✕</button>
+                </div>`;
+            });
+        }
+        html += '</div>';
+    } else {
+        if (!state.savedSections.length) {
+            html += '<div class="empty-state"><div class="big">📋</div>Keine Notizen. Klick 📋 bei Inhalt, Meinung oder Erfahrung!</div>';
+        } else {
+            state.savedSections.forEach((s, i) => {
+                html += `<div class="review-card"><button class="rc-del" onclick="delSection(${i})">✕</button>
+                    <div class="rc-title">${s.title}</div>
+                    <div class="rc-text">${s.text}</div></div>`;
+            });
+        }
+    }
+    grid.innerHTML = html;
+}
+function delSection(i) {
+    state.savedSections.splice(i, 1);
+    saveMySections();
+    renderMyVocab();
+    updateStats();
+}
+function addVocab() {
+    const de = document.getElementById('mvDe').value.trim();
+    const ar = document.getElementById('mvAr').value.trim();
+    if (!de || !ar) return;
+    state.myVocab.push({de, ar});
+    saveMyVocab();
+    document.getElementById('mvDe').value = '';
+    document.getElementById('mvAr').value = '';
+    renderMyVocab();
+    updateStats();
+}
+function delVocab(i) {
+    state.myVocab.splice(i, 1);
+    saveMyVocab();
+    renderMyVocab();
+    updateStats();
+}
+// ============================================================
+// QUIZ
+// ============================================================
+function initQuiz() {
+    state.quiz.idx = 0; state.quiz.correct = 0; state.quiz.total = 0;
+    state.quiz.answered = false; state.quiz.source = 'all';
+    buildQuizPool();
+}
+function buildQuizPool() {
+    const p = [];
+    if (state.quiz.source === 'all') {
+        THEMES.forEach(t => { if(t.vocab) t.vocab.forEach(v => p.push(v)); });
+    } else if (state.quiz.source === 'my') {
+        state.myVocab.forEach(v => p.push(v));
+    }
+    if (!p.length) {
+        document.getElementById('themeGrid').innerHTML = '<div class="empty-state"><div class="big">🧠</div>Keine Vokabeln fürs Quiz. Füge eigene hinzu oder öffne ein Thema.</div>';
+        return;
+    }
+    // Shuffle
+    for (let i = p.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
+    state.quiz.pool = p.slice(0, 20);
+    renderQuiz();
+}
+function setQuizSource(src) {
+    state.quiz.source = src;
+    document.querySelectorAll('.exam-source button').forEach(b => b.classList.toggle('active', b.dataset.src === src));
+    buildQuizPool();
+}
+function renderQuiz() {
+    const grid = document.getElementById('themeGrid');
+    const pool = state.quiz.pool;
+    if (!pool.length) { grid.innerHTML = '<div class="empty-state"><div class="big">🧠</div>Keine Vokabeln. Füge eigene hinzu!</div>'; return; }
+    const idx = state.quiz.idx;
+    if (idx >= pool.length) {
+        const score = Math.round((state.quiz.correct / state.quiz.total) * 100);
+        grid.innerHTML = `<div class="exam-card">
+            <div class="big" style="font-size:40px">🎉</div>
+            <div style="font-size:18px;font-weight:800;margin:8px 0">Quiz beendet!</div>
+            <div style="font-size:14px;color:var(--text-dim)">${state.quiz.correct} / ${state.quiz.total} richtig (${score}%)</div>
+            <div style="margin-top:12px"><button class="add-btn" onclick="initQuiz()">🔄 Nochmal</button></div>
+        </div>`;
+        return;
+    }
+    const word = pool[idx];
+    // Generate wrong options
+    let wrong = [];
+    const allPool = [...THEMES.flatMap(t => t.vocab || []), ...state.myVocab];
+    const shuffled = [...allPool].sort(() => Math.random() - 0.5);
+    for (const w of shuffled) {
+        if (w.de !== word.de && !wrong.includes(w.ar) && wrong.length < 3) wrong.push(w.ar);
+    }
+    while (wrong.length < 3) wrong.push('???');
+    // Options (correct + 3 wrong, shuffled)
+    const opts = [{text: word.ar, correct: true}, ...wrong.map(w => ({text: w, correct: false}))];
+    for (let i = opts.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [opts[i], opts[j]] = [opts[j], opts[i]]; }
+    const progress = ((idx) / pool.length) * 100;
+    grid.innerHTML = `
+    <div class="exam-source">
+        <button data-src="all" class="active" onclick="setQuizSource('all')">📚 Alle Themen</button>
+        <button data-src="my" onclick="setQuizSource('my')">📝 Meine Vokabeln</button>
+    </div>
+    <div class="exam-progress"><div class="exam-progress-bar" style="width:${progress}%"></div></div>
+    <div class="exam-card">
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px">${idx+1} / ${pool.length}</div>
+        <div class="exam-word">${word.de}</div>
+        <div class="exam-trans ${state.quiz.answered?'show':''}">${word.ar}</div>
+        <div class="exam-options">`;
+    opts.forEach((o, i) => {
+        const cls = state.quiz.answered ? (o.correct ? 'correct' : '') : '';
+        grid.innerHTML += `<button class="exam-opt ${cls}" onclick="answerQuiz(${i},${o.correct})" ${state.quiz.answered?'disabled':''}>${o.text}</button>`;
+    });
+    grid.innerHTML += `</div>
+        <div class="exam-score">✅ ${state.quiz.correct} / ${state.quiz.total}</div>
+        <div style="margin-top:8px"><button class="add-btn" onclick="nextQuiz()" style="${state.quiz.answered?'':'display:none'}">➡️ Nächste</button></div>
+    </div>`;
+}
+function answerQuiz(optIdx, correct) {
+    if (state.quiz.answered) return;
+    state.quiz.answered = true;
+    state.quiz.total++;
+    if (correct) state.quiz.correct++;
+    renderQuiz();
+}
+function nextQuiz() {
+    state.quiz.idx++;
+    state.quiz.answered = false;
+    renderQuiz();
+}
+// ============================================================
+// B2 WORTSCHATZ
+// ============================================================
+const B2_VOCAB = [
+    {cat:"Essen & Trinken",catAr:"الطعام والشراب",icon:"🍽️",words:[
+        {de:"die Ernährungsgewohnheit",ar:"عادة غذائية",ctx:"Über Esskultur, Gesundheit, Alltag",ctxAr:"عن ثقافة الطعام، الصحة، الحياة اليومية",ex:"In Deutschland haben viele Menschen ungesunde Ernährungsgewohnheiten.",exAr:"في ألمانيا كثير من الناس لديهم عادات غذائية غير صحية."},
+        {de:"der Geschmack",ar:"الطعم / الذوق",ctx:"Essen bewerten, Vorlieben ausdrücken",ctxAr:"تقييم الطعام، التعبير عن التفضيلات",ex:"Das Essen hat mir sehr gut geschmeckt.",exAr:"الطعام أعجبني كثيراً."},
+        {de:"die Mahlzeit",ar:"الوجبة",ctx:"Über Essenszeiten sprechen",ctxAr:"التحدث عن أوقات الوجبات",ex:"Wir nehmen drei Mahlzeiten am Tag zu uns.",exAr:"نتناول ثلاث وجبات في اليوم."},
+        {de:"die Zutat",ar:"المكون",ctx:"Rezepte, Kochen, Einkaufen",ctxAr:"وصفات، طبخ، تسوق",ex:"Frische Zutaten sind wichtig für gutes Essen.",exAr:"المكونات الطازجة مهمة للطعام الجيد."},
+        {de:"die Ernährung",ar:"التغذية",ctx:"Gesundheit, Diät, Lebensstil",ctxAr:"صحة، حمية، نمط حياة",ex:"Eine ausgewogene Ernährung ist wichtig für die Gesundheit.",exAr:"التغذية المتوازنة مهمة للصحة."},
+        {de:"satt sein",ar:"شبعان",ctx:"Nach dem Essen, Mengenangabe",ctxAr:"بعد الأكل، وصف الكمية",ex:"Nach der Suppe bin ich schon satt.",exAr:"بعد الحساء أنا شبعان."},
+        {de:"das Fertiggericht",ar:"الوجبة الجاهزة",ctx:"Convenience Food, Kritik daran",ctxAr:"الطعام الجاهز، نقد له",ex:"Fertiggerichte enthalten oft zu viel Salz.",exAr:"الوجبات الجاهزة تحتوي غالباً على ملح كثير."},
+        {de:"selbst gekocht",ar:"مطبوخ في البيت",ctx:"Vorteile von selbstgemachtem Essen",ctxAr:"مزايا الطعام المنزلي",ex:"Selbst gekochtes Essen schmeckt besser und ist gesünder.",exAr:"الطعام المطبوخ في البيت أطعم وأصح."},
+    ]},
+    {cat:"Reisen & Verkehr",catAr:"السفر والمواصلات",icon:"🚗",words:[
+        {de:"die Verkehrsverbindung",ar:"وسيلة النقل / الربط",ctx:"Öffentliche Verkehrsmittel, Reiseplanung",ctxAr:"وسائل النقل العام، تخطيط الرحلة",ex:"Die Verkehrsverbindungen auf dem Land sind schlecht.",exAr:"وسائل النقل في الريف سيئة."},
+        {de:"die Fahrkarte",ar:"تذكرة السفر",ctx:"Ticketkauf, öffentliche Verkehrsmittel",ctxAr:"شراء التذاكر، وسائل النقل العام",ex:"Ich habe eine Fahrkarte für den Zug gekauft.",exAr:"اشتريت تذكرة للقطار."},
+        {de:"die Verspätung",ar:"التأخير",ctx:"Zug/Bus/Flug Probleme",ctxAr:"مشاكل القطار/الحافلة/الطائرة",ex:"Der Zug hatte 30 Minuten Verspätung.",exAr:"تأخر القطار 30 دقيقة."},
+        {de:"die Umweltzone",ar:"المنطقة البيئية",ctx:"Umwelt, Stadtverkehr, Regeln",ctxAr:"البيئة، حركة المرور في المدينة، القوانين",ex:"In vielen Städten gibt es Umweltzonen für Autos.",exAr:"في كثير من المدن توجد مناطق بيئية للسيارات."},
+        {de:"der Berufsverkehr",ar:"حركة المرور في أوقات الذروة",ctx:"Stau, Pendeln, Stadtleben",ctxAr:"ازدحام، تنقل، حياة المدينة",ex:"Im Berufsverkehr sollte man nicht mit dem Auto fahren.",exAr:"في أوقات الذروة لا ينصح بالقيادة."},
+        {de:"die Fahrgemeinschaft",ar:"مشاركة السيارة",ctx:"Umweltfreundlich reisen, Geld sparen",ctxAr:"سفر صديق للبيئة، توفير المال",ex:"Wir bilden eine Fahrgemeinschaft zur Arbeit.",exAr:"نشكل مجموعة مشاركة سيارة للعمل."},
+        {de:"die Hin- und Rückfahrt",ar:"ذهاب وإياب",ctx:"Reise planen, Ticket kaufen",ctxAr:"تخطيط الرحلة، شراء التذكرة",ex:"Eine Hin- und Rückfahrt kostet 50 Euro.",exAr:"تذكرة ذهاب وإياب تكلف 50 يورو."},
+    ]},
+    {cat:"Wohnen & Leben",catAr:"السكن والحياة",icon:"🏠",words:[
+        {de:"die Mietwohnung",ar:"شقة للإيجار",ctx:"Wohnungssuche, Umzug",ctxAr:"البحث عن سكن، انتقال",ex:"Ich suche eine günstige Mietwohnung in der Stadt.",exAr:"أبحث عن شقة بإيجار معقول في المدينة."},
+        {de:"die Nebenkosten",ar:"التكاليف الإضافية",ctx:"Wohnkosten, Budget",ctxAr:"تكاليف السكن، الميزانية",ex:"Die Nebenkosten sind in der Wohnung sehr hoch.",exAr:"التكاليف الإضافية في الشقة مرتفعة جداً."},
+        {de:"der Umzug",ar:"الانتقال",ctx:"Neue Wohnung, Veränderung",ctxAr:"سكن جديد، تغيير",ex:"Ein Umzug in eine andere Stadt ist stressig.",exAr:"الانتقال إلى مدينة أخرى مرهق."},
+        {de:"die Nachbarschaft",ar:"الجوار",ctx:"Soziales Leben, Konflikte",ctxAr:"الحياة الاجتماعية، النزاعات",ex:"In meiner Nachbarschaft herrscht eine freundliche Atmosphäre.",exAr:"في جيراني يسود جو ودي."},
+        {de:"die WG (Wohngemeinschaft)",ar:"سكن مشترك",ctx:"Wohnformen, Zusammenleben",ctxAr:"أشكال السكن، العيش المشترك",ex:"In einer WG zu wohnen ist günstiger und geselliger.",exAr:"السكن في WG أرخص وأكثر اجتماعية."},
+        {de:"die Kaution",ar:"تأمين السكن",ctx:"Mietvertrag, Kosten",ctxAr:"عقد الإيجار، التكاليف",ex:"Die Kaution beträgt drei Monatsmieten.",exAr:"تأمين السكن يعادل ثلاثة إيجارات شهرية."},
+        {de:"der Lärm",ar:"الضجيج",ctx:"Probleme in der Wohnung, Konflikte",ctxAr:"مشاكل في السكن، نزاعات",ex:"Der Lärm von der Baustelle stört mich sehr.",exAr:"ضجيج موقع البناء يزعجني كثيراً."},
+    ]},
+    {cat:"Arbeit & Beruf",catAr:"العمل والمهنة",icon:"💼",words:[
+        {de:"der Arbeitgeber",ar:"صاحب العمل",ctx:"Jobsuche, Arbeitsvertrag",ctxAr:"البحث عن عمل، عقد العمل",ex:"Der Arbeitgeber bietet flexible Arbeitszeiten an.",exAr:"صاحب العمل يقدم ساعات عمل مرنة."},
+        {de:"der Arbeitnehmer",ar:"الموظف",ctx:"Rechte und Pflichten im Job",ctxAr:"الحقوق والواجبات في العمل",ex:"Die Rechte der Arbeitnehmer sind in Deutschland gut geschützt.",exAr:"حقوق الموظفين محمية جيداً في ألمانيا."},
+        {de:"die Stellenanzeige",ar:"إعلان وظيفة",ctx:"Jobsuche, Bewerbung",ctxAr:"البحث عن عمل، تقديم طلب",ex:"Ich habe mich auf eine Stellenanzeige beworben.",exAr:"تقدمت لوظيفة في إعلان."},
+        {de:"das Vorstellungsgespräch",ar:"مقابلة العمل",ctx:"Bewerbungsprozess",ctxAr:"عملية التقديم",ex:"Das Vorstellungsgespräch verlief sehr positiv.",exAr:"مقابلة العمل كانت إيجابية جداً."},
+        {de:"die Weiterbildung",ar:"التطوير المهني",ctx:"Karriere, Qualifikation",ctxAr:"المسيرة المهنية، المؤهلات",ex:"Weiterbildungen sind wichtig für die Karriere.",exAr:"التطوير المهني مهم للمسيرة الوظيفية."},
+        {de:"der Mindestlohn",ar:"الحد الأدنى للأجور",ctx:"Arbeitsbedingungen, Politik",ctxAr:"ظروف العمل، السياسة",ex:"Der Mindestlohn in Deutschland beträgt 12 Euro pro Stunde.",exAr:"الحد الأدنى للأجور في ألمانيا 12 يورو في الساعة."},
+        {de:"die Überstunde",ar:"ساعة إضافية",ctx:"Arbeitszeit, Belastung",ctxAr:"وقت العمل، الضغط",ex:"Ich mache oft Überstunden, bekomme sie aber bezahlt.",exAr:"أعمل ساعات إضافية لكنني أتقاضى أجرها."},
+    ]},
+    {cat:"Schule & Bildung",catAr:"المدرسة والتعليم",icon:"📚",words:[
+        {de:"die Allgemeinbildung",ar:"التعليم العام",ctx:"Bildungssystem, Fächer",ctxAr:"نظام التعليم، المواد",ex:"Eine gute Allgemeinbildung ist wichtig für das Leben.",exAr:"التعليم العام الجيد مهم للحياة."},
+        {de:"die Ganztagsschule",ar:"مدرسة اليوم الكامل",ctx:"Schulsysteme, Betreuung",ctxAr:"أنظمة المدارس، الرعاية",ex:"An Ganztagsschulen gibt es Angebote am Nachmittag.",exAr:"في مدارس اليوم الكامل توجد عروض بعد الظهر."},
+        {de:"der Leistungsdruck",ar:"ضغط الأداء",ctx:"Probleme in der Schule, Stress",ctxAr:"مشاكل في المدرسة، التوتر",ex:"Der Leistungsdruck in der Schule ist für viele Schüler zu hoch.",exAr:"ضغط الأداء في المدرسة مرتفع جداً لكثير من الطلاب."},
+        {de:"die Hausaufgabe",ar:"الواجب المنزلي",ctx:"Schulalltag, Diskussion",ctxAr:"الحياة المدرسية، نقاش",ex:"Die Hausaufgaben sollten nicht zu zeitaufwendig sein.",exAr:"الواجبات المنزلية يجب ألا تستغرق وقتاً طويلاً."},
+        {de:"das Stipendium",ar:"المنحة الدراسية",ctx:"Finanzierung, Studium",ctxAr:"التمويل، الدراسة الجامعية",ex:"Sie hat ein Stipendium für ihr Studium bekommen.",exAr:"حصلت على منحة لدراستها الجامعية."},
+        {de:"der Austausch",ar:"التبادل",ctx:"Internationale Erfahrung, Sprachen",ctxAr:"تجربة دولية، لغات",ex:"Ein Schüleraustausch fördert die Sprachkenntnisse.",exAr:"التبادل الطلابي يعزز المهارات اللغوية."},
+        {de:"die Berufsausbildung",ar:"التدريب المهني",ctx:"Ausbildungssystem, Karriereweg",ctxAr:"نظام التدريب، المسار المهني",ex:"Die Berufsausbildung ist eine gute Alternative zum Studium.",exAr:"التدريب المهني بديل جيد للدراسة الجامعية."},
+    ]},
+    {cat:"Umwelt & Natur",catAr:"البيئة والطبيعة",icon:"🌱",words:[
+        {de:"der Klimawandel",ar:"التغير المناخي",ctx:"Umweltprobleme, Diskussion",ctxAr:"مشاكل البيئة، نقاش",ex:"Der Klimawandel ist eine der größten Herausforderungen.",exAr:"التغير المناخي أحد أكبر التحديات."},
+        {de:"die Erneuerbare Energie",ar:"الطاقة المتجددة",ctx:"Umweltschutz, Technologie",ctxAr:"حماية البيئة، التكنولوجيا",ex:"Erneuerbare Energien sind wichtig für die Zukunft.",exAr:"الطاقة المتجددة مهمة للمستقبل."},
+        {de:"der Müll trennen",ar:"فرز النفايات",ctx:"Alltag, Umweltschutz",ctxAr:"الحياة اليومية، حماية البيئة",ex:"In Deutschland muss man den Müll trennen.",exAr:"في ألمانيا يجب فرز النفايات."},
+        {de:"die Umweltverschmutzung",ar:"تلوث البيئة",ctx:"Probleme, Lösungen",ctxAr:"مشاكل، حلول",ex:"Die Umweltverschmutzung nimmt weltweit zu.",exAr:"تلوث البيئة يزداد عالمياً."},
+        {de:"der ökologische Fußabdruck",ar:"البصمة البيئية",ctx:"Nachhaltigkeit, persönlicher Beitrag",ctxAr:"الاستدامة، المساهمة الشخصية",ex:"Jeder sollte seinen ökologischen Fußabdruck reduzieren.",exAr:"على كل شخص تقليل بصمته البيئية."},
+        {de:"das Plastik",ar:"البلاستيك",ctx:"Müllvermeidung, Umwelt",ctxAr:"تجنب النفايات، البيئة",ex:"Weniger Plastik zu verwenden hilft der Umwelt.",exAr:"استخدام بلاستيك أقل يساعد البيئة."},
+        {de:"der Artenschutz",ar:"حماية الأنواع",ctx:"Tiere, Biodiversität",ctxAr:"الحيوانات، التنوع البيولوجي",ex:"Artenschutz ist wichtig für das Gleichgewicht der Natur.",exAr:"حماية الأنواع مهمة لتوازن الطبيعة."},
+    ]},
+    {cat:"Gesundheit & Sport",catAr:"الصحة والرياضة",icon:"💪",words:[
+        {de:"die Krankenversicherung",ar:"التأمين الصحي",ctx:"Gesundheitssystem, Kosten",ctxAr:"النظام الصحي، التكاليف",ex:"In Deutschland ist eine Krankenversicherung Pflicht.",exAr:"في ألمانيا التأمين الصحي إلزامي."},
+        {de:"der Hausarzt",ar:"طبيب العائلة",ctx:"Medizinische Versorgung, Termin",ctxAr:"الرعاية الطبية، موعد",ex:"Ich gehe regelmäßig zum Hausarzt zur Vorsorge.",exAr:"أذهب لطبيب العائلة بانتظام للفحص الوقائي."},
+        {de:"die Vorsorge",ar:"الوقاية",ctx:"Gesundheit, Prävention",ctxAr:"الصحة، الوقاية",ex:"Vorsorgeuntersuchungen sind wichtig für die Gesundheit.",exAr:"الفحوصات الوقائية مهمة للصحة."},
+        {de:"der Bewegungsmangel",ar:"قلة الحركة",ctx:"Gesundheitsprobleme, Alltag",ctxAr:"مشاكل صحية، الحياة اليومية",ex:"Bewegungsmangel führt oft zu Rückenschmerzen.",exAr:"قلة الحركة تؤدي غالباً لآلام الظهر."},
+        {de:"die Ernährungsumstellung",ar:"تغيير النظام الغذائي",ctx:"Diät, gesünder leben",ctxAr:"حمية، حياة صحية أكثر",ex:"Eine Ernährungsumstellung kann beim Abnehmen helfen.",exAr:"تغيير النظام الغذائي يمكن أن يساعد في إنقاص الوزن."},
+        {de:"der Ausdauersport",ar:"رياضة التحمل",ctx:"Fitness, Training",ctxAr:"لياقة، تدريب",ex:"Joggen und Schwimmen sind gute Ausdauersportarten.",exAr:"الركض والسباحة من رياضات التحمل الجيدة."},
+    ]},
+    {cat:"Medien & Technologie",catAr:"الإعلام والتكنولوجيا",icon:"📱",words:[
+        {de:"die Sozialen Medien",ar:"وسائل التواصل الاجتماعي",ctx:"Internet, Kommunikation",ctxAr:"الإنترنت، التواصل",ex:"Soziale Medien beeinflussen unsere Meinung stark.",exAr:"وسائل التواصل الاجتماعي تؤثر كثيراً على رأينا."},
+        {de:"der Bildschirm",ar:"الشاشة",ctx:"Technologie, Alltag",ctxAr:"التكنولوجيا، الحياة اليومية",ex:"Kinder sollten nicht zu lange vor dem Bildschirm sitzen.",exAr:"الأطفال لا يجب أن يجلسوا طويلاً أمام الشاشة."},
+        {de:"die Suchmaschine",ar:"محرك البحث",ctx:"Internetnutzung, Information",ctxAr:"استخدام الإنترنت، المعلومات",ex:"Google ist die bekannteste Suchmaschine der Welt.",exAr:"جوجل أشهر محرك بحث في العالم."},
+        {de:"der Datenschutz",ar:"حماية البيانات",ctx:"Privatsphäre, Internet",ctxAr:"الخصوصية، الإنترنت",ex:"Datenschutz ist im digitalen Zeitalter sehr wichtig.",exAr:"حماية البيانات مهمة جداً في العصر الرقمي."},
+        {de:"die Filterblase",ar:"فقاعة التصفية",ctx:"Medienkritik, Algorithmen",ctxAr:"نقد الإعلام، الخوارزميات",ex:"Soziale Medien erschaffen oft eine Filterblase.",exAr:"وسائل التواصل تخلق غالباً فقاعة تصفية."},
+        {de:"der Medienkonsum",ar:"استهلاك الإعلام",ctx:"Gewohnheiten, Kritik",ctxAr:"العادات، النقد",ex:"Der Medienkonsum bei Jugendlichen ist sehr hoch.",exAr:"استهلاك الإعلام عند المراهقين مرتفع جداً."},
+    ]},
+    {cat:"Gesellschaft & Politik",catAr:"المجتمع والسياسة",icon:"🏛️",words:[
+        {de:"die Integration",ar:"الاندماج",ctx:"Migration, Zusammenleben",ctxAr:"الهجرة، العيش المشترك",ex:"Integration ist ein wichtiges Thema in Deutschland.",exAr:"الاندماج موضوع مهم في ألمانيا."},
+        {de:"die Meinungsfreiheit",ar:"حرية الرأي",ctx:"Grundrechte, Demokratie",ctxAr:"الحقوق الأساسية، الديمقراطية",ex:"Meinungsfreiheit ist ein hohes Gut.",exAr:"حرية الرأي قيمة عظيمة."},
+        {de:"die Freiwilligenarbeit",ar:"العمل التطوعي",ctx:"Engagement, Gesellschaft",ctxAr:"المشاركة، المجتمع",ex:"Freiwilligenarbeit stärkt den Zusammenhalt.",exAr:"العمل التطوعي يقوي التماسك الاجتماعي."},
+        {de:"die Wahl",ar:"الانتخابات",ctx:"Politik, Demokratie",ctxAr:"السياسة، الديمقراطية",ex:"Jeder Bürger hat das Recht zu wählen.",exAr:"لكل مواطن الحق في الانتخاب."},
+        {de:"die Generation",ar:"الجيل",ctx:"Familie, Gesellschaft, Unterschiede",ctxAr:"العائلة، المجتمع، الاختلافات",ex:"Die junge Generation denkt anders über die Arbeit.",exAr:"الجيل الجديد يفكر بشكل مختلف عن العمل."},
+        {de:"der Zusammenhalt",ar:"التماسك",ctx:"Gesellschaft, Werte",ctxAr:"المجتمع، القيم",ex:"Der gesellschaftliche Zusammenhalt ist in der Krise wichtig.",exAr:"التماسك الاجتماعي مهم في الأزمات."},
+    ]},
+    {cat:"Gefühle & Beziehungen",catAr:"المشاعر والعلاقات",icon:"❤️",words:[
+        {de:"die Beziehung",ar:"العلاقة",ctx:"Partner, Familie, Freunde",ctxAr:"شريك، عائلة، أصدقاء",ex:"Eine gute Beziehung braucht Vertrauen und Respekt.",exAr:"العلاقة الجيدة تحتاج ثقة واحتراماً."},
+        {de:"der Streit",ar:"الشجار / الخلاف",ctx:"Konflikte, Lösungen",ctxAr:"النزاعات، الحلول",ex:"Nach einem Streit sollte man wieder aufeinander zugehen.",exAr:"بعد الخلاف يجب التقارب مرة أخرى."},
+        {de:"das Vertrauen",ar:"الثقة",ctx:"Freundschaft, Familie",ctxAr:"الصداقة، العائلة",ex:"Vertrauen ist die Basis jeder Freundschaft.",exAr:"الثقة أساس كل صداقة."},
+        {de:"die Einsamkeit",ar:"الوحدة",ctx:"Probleme, Alter, Gesellschaft",ctxAr:"مشاكل، الشيخوخة، المجتمع",ex:"Einsamkeit ist ein wachsendes Problem in der Gesellschaft.",exAr:"الوحدة مشكلة متنامية في المجتمع."},
+        {de:"die Toleranz",ar:"التسامح",ctx:"Zusammenleben, Werte",ctxAr:"العيش المشترك، القيم",ex:"Toleranz gegenüber anderen Kulturen ist wichtig.",exAr:"التسامح تجاه الثقافات الأخرى مهم."},
+        {de:"das Verständnis",ar:"التفاهم",ctx:"Kommunikation, Empathie",ctxAr:"التواصل، التعاطف",ex:"Wir sollten mehr Verständnis füreinander haben.",exAr:"يجب أن يكون لدينا تفاهم أكثر تجاه بعضنا."},
+    ]},
+    {cat:"Kultur & Freizeit",catAr:"الثقافة وأوقات الفراغ",icon:"🎭",words:[
+        {de:"das Hobby",ar:"الهواية",ctx:"Freizeit, Interessen",ctxAr:"وقت الفراغ، الاهتمامات",ex:"Mein Hobby ist es, Musik zu hören und zu lesen.",exAr:"هوايتي سماع الموسيقى والقراءة."},
+        {de:"die Veranstaltung",ar:"الفعالية / المناسبة",ctx:"Kultur, Ausgehen",ctxAr:"الثقافة، الخروج",ex:"Es gibt viele kulturelle Veranstaltungen in der Stadt.",exAr:"هناك فعاليات ثقافية كثيرة في المدينة."},
+        {de:"das Ehrenamt",ar:"العمل التطوعي",ctx:"Engagement, Freizeit",ctxAr:"المشاركة، وقت الفراغ",ex:"Ein Ehrenamt kann sehr erfüllend sein.",exAr:"العمل التطوعي يمكن أن يكون مرضياً جداً."},
+        {de:"die Freizeitgestaltung",ar:"تنظيم وقت الفراغ",ctx:"Alltag, Hobbys",ctxAr:"الحياة اليومية، الهوايات",ex:"Eine gute Freizeitgestaltung ist wichtig für die Work-Life-Balance.",exAr:"تنظيم وقت الفراغ الجيد مهم للتوازن بين العمل والحياة."},
+        {de:"die Tradition",ar:"التقليد",ctx:"Kultur, Feste, Bräuche",ctxAr:"الثقافة، الأعياد، العادات",ex:"Traditionen sollten bewahrt, aber auch hinterfragt werden.",exAr:"التقاليد يجب الحفاظ عليها ولكن أيضاً مراجعتها."},
+        {de:"das Festival",ar:"المهرجان",ctx:"Musik, Kultur, Veranstaltungen",ctxAr:"الموسيقى، الثقافة، الفعاليات",ex:"Im Sommer finden viele Musikfestivals statt.",exAr:"في الصيف تقام مهرجانات موسيقية كثيرة."},
+    ]},
+    {cat:"Geld & Wirtschaft",catAr:"المال والاقتصاد",icon:"💰",words:[
+        {de:"das Einkommen",ar:"الدخل",ctx:"Finanzen, Beruf",ctxAr:"المالية، العمل",ex:"Das durchschnittliche Einkommen in Deutschland liegt bei 45.000 Euro.",exAr:"متوسط الدخل في ألمانيا حوالي 45 ألف يورو."},
+        {de:"die Ausgabe",ar:"المصروف",ctx:"Budget, Geldausgeben",ctxAr:"الميزانية، إنفاق المال",ex:"Ich sollte meine Ausgaben besser kontrollieren.",exAr:"يجب أن أتحكم بمصاريفي بشكل أفضل."},
+        {de:"das Sparkonto",ar:"حساب التوفير",ctx:"Sparen, Finanzen",ctxAr:"الادخار، المالية",ex:"Ein Sparkonto ist sicher, aber die Zinsen sind niedrig.",exAr:"حساب التوفير آمن لكن الفائدة منخفضة."},
+        {de:"die Verschuldung",ar:"المديونية",ctx:"Probleme, Kredite",ctxAr:"مشاكل، قروض",ex:"Viele junge Menschen haben Probleme mit Verschuldung.",exAr:"كثير من الشباب لديهم مشاكل مع المديونية."},
+        {de:"der Konsum",ar:"الاستهلاك",ctx:"Gesellschaft, Wirtschaft",ctxAr:"المجتمع، الاقتصاد",ex:"Unser Konsumverhalten beeinflusst die Umwelt.",exAr:"سلوكنا الاستهلاكي يؤثر على البيئة."},
+        {de:"die Inflation",ar:"التضخم",ctx:"Wirtschaft, Preise",ctxAr:"الاقتصاد، الأسعار",ex:"Die Inflation steigt und alles wird teurer.",exAr:"التضخم يرتفع وكل شيء يصبح أغلى."},
+    ]},
+];
+let vocabCatOpen = {};
+function renderVocab() {
+    const grid = document.getElementById('themeGrid');
+    let html = '<div class="vocab-list">';
+    B2_VOCAB.forEach((cat, ci) => {
+        const isOpen = vocabCatOpen[ci] || false;
+        html += `<div class="vocab-cat">
+            <div class="vocab-cat-header ${isOpen?'open':''}" onclick="toggleVocabCat(${ci})">
+                <span class="vcat-icon">${cat.icon}</span>
+                <span class="vcat-title">${cat.cat} <span style="color:var(--ar);font-weight:400">(${cat.catAr})</span></span>
+                <span class="vcat-count">${cat.words.length}</span>
+                <span class="vcat-arrow">▶</span>
+            </div>
+            <div class="vocab-cat-body ${isOpen?'open':''}">`;
+        if (em()) {
+            cat.words.forEach(w => { html += `<div class="vword"><div class="vw-de">${w.de}</div><div class="vw-ctx">📌 ${w.ctx}</div><div class="vw-ex">💬 ${w.ex}</div></div>`; });
+        } else {
+            cat.words.forEach(w => {
+                html += `<div class="vword"><div class="vw-de">${w.de}</div><div class="vw-ar">${w.ar}</div>
+                    <div class="vw-ctx">📌 ${w.ctx} / ${w.ctxAr}</div>
+                    <div class="vw-ex">💬 ${w.ex}</div><div class="vw-ex-ar">${w.exAr}</div></div>`;
+            });
+        }
+        html += `</div></div>`;
+    });
+    html += '</div>';
+    grid.innerHTML = html;
+}
+function toggleVocabCat(ci) {
+    vocabCatOpen[ci] = !vocabCatOpen[ci];
+    renderVocab();
+}
+// ============================================================
+// BOOT
+// ============================================================
+init();
+</script>
+</body>
+</html>
