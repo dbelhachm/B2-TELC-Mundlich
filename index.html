@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>B2 Mündliche Prüfung – Deutsch & Arabisch</title>
     <script src="b2-data.js"></script>
+<script src="exam-texts.js"></script>
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
         :root{
@@ -55,6 +56,12 @@
         .theme-title{font-size:12px;font-weight:600;line-height:1.3}
         .theme-sub{font-size:10px;color:var(--ar);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         .theme-tag{font-size:8px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--violet-bg);color:var(--violet);flex-shrink:0}
+        .card-list{display:flex;flex-direction:column;gap:8px}
+        .theme-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;cursor:pointer;transition:all .15s}
+        .theme-card:hover{border-color:var(--border-active);background:var(--card-hover)}
+        .tc-header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;font-size:12px;font-weight:600}
+        .tc-ar{font-size:10px;color:var(--ar);font-weight:400}
+        .tc-text{font-size:11px;color:var(--text-dim);line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
         .detail-view{display:none}.detail-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
         .detail-back{background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;padding:4px}
         .detail-back:hover{color:var(--text)}.detail-title-de{font-size:15px;font-weight:700;flex:1;line-height:1.3}
@@ -166,7 +173,26 @@
         .vword .vw-ctx{font-size:10px;color:var(--text-muted);margin-top:4px;font-style:italic;line-height:1.4}
         .vword .vw-ex{font-size:11px;color:var(--text-dim);margin-top:3px;line-height:1.4;padding:6px 8px;background:var(--card);border-radius:4px}
         .vword .vw-ex-ar{font-size:10px;color:var(--ar);margin-top:2px;line-height:1.3}
-        @media(max-width:480px){.app{padding:10px 6px 80px}.stats-row{grid-template-columns:repeat(2,1fr)}.tab{font-size:9px;min-width:42px;padding:9px 2px}.tabs{padding:3px;gap:1px}.stat{padding:6px 2px}.stat-num{font-size:14px}.theme-item{padding:10px}.theme-title{font-size:11px}.section-title{font-size:9px}.de-text{font-size:11px;padding:10px 12px}.detail-title-de{font-size:14px}}
+        .cw{cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.15);transition:all .15s;display:inline}
+        .cw:hover{color:var(--gold);border-bottom-color:var(--gold);background:rgba(245,158,11,0.06);border-radius:2px}
+        .word-popup{position:fixed;background:var(--card);border:1px solid rgba(251,191,36,0.3);border-radius:var(--radius);padding:12px 14px;z-index:1000;box-shadow:0 8px 40px rgba(0,0,0,0.7);min-width:200px;max-width:280px;backdrop-filter:blur(12px);animation:fadeIn .15s ease}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+        .word-popup .wp-word{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-0.3px}
+        .word-popup .wp-meaning{font-size:13px;color:var(--ar);margin-bottom:6px;line-height:1.4;padding:4px 0}
+        .word-popup .wp-hint{font-size:10px;color:var(--text-muted);margin-bottom:6px;font-style:italic}
+        .wp-actions{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;padding-top:6px;border-top:1px solid var(--border)}
+        .wp-btn{font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap}
+        .wp-btn:hover{background:var(--gold-bg);color:var(--gold);border-color:var(--gold-dim)}
+        .wp-btn.playing{background:var(--gold-bg);color:var(--gold);border-color:var(--gold)}
+        .tts-btn{font-size:10px;padding:1px 7px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-family:inherit;margin-left:3px;transition:all .15s;line-height:1.6;font-weight:600}
+        .tts-btn:hover{background:var(--green-bg);color:var(--green);border-color:rgba(52,211,153,0.3)}
+        .tts-btn.playing{background:var(--green-bg);color:var(--green);border-color:var(--green);animation:ttsPulse .8s ease infinite}
+        .play-all-btn{font-size:11px;padding:3px 9px;margin-left:3px}
+        .voice-select{font-size:9px;padding:2px 5px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:inherit;max-width:100px;cursor:pointer;outline:none}
+        .voice-select:hover{border-color:var(--border-active)}
+
+        @keyframes ttsPulse{0%,100%{opacity:1}50%{opacity:0.5}}
+        @media(max-width:480px){.app{padding:10px 6px 80px}.stats-row{grid-template-columns:repeat(2,1fr)}.tab{font-size:9px;min-width:42px;padding:9px 2px}.tabs{padding:3px;gap:1px}.stat{padding:6px 2px}.stat-num{font-size:14px}.theme-item{padding:10px}.theme-title{font-size:11px}.section-title{font-size:9px}.de-text{font-size:11px;padding:10px 12px}.detail-title-de{font-size:14px}.ar-text,.ar-arg,.ar-phrase,.ar-idea{font-size:9px}.tc-header{font-size:10px}.tc-text{font-size:10px}.ps-title-de{font-size:11px}.ps-title-ar{font-size:9px}.ps-text-de{font-size:10px}.ps-text-ar{font-size:9px}.vocab-de{font-size:10px}.vocab-ar{font-size:9px}}
     </style>
 </head>
 <body>
@@ -176,7 +202,8 @@
             <div class="logo">B2 <span>Prüfung</span> &nbsp;<span style="font-weight:400;font-size:12px">🇩🇪 + 🇸🇦</span></div>
             <div class="logo-sub">Inhalt · Meinung · Erfahrung · Quiz</div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
+        <div style="display:flex;align-items:center;gap:6px">
+            <select id="voiceSelect" onchange="setVoice(this.value)" style="display:none" class="voice-select" title="Stimme auswählen / اختر الصوت"></select>
             <button class="exam-btn" id="examBtn" onclick="toggleExam()">🎯 Prüfung</button>
             <span class="badge" id="countDone">0/38</span>
         </div>
@@ -209,6 +236,7 @@
                 <div class="detail-title-ar" id="detailTitleAr"></div>
             </div>
             <div class="theme-check" id="detailCheck" onclick="toggleDone()"></div>
+            <button class="tts-btn play-all-btn" id="playAllBtn" onclick="playAllTheme()" title="Alles vorlesen / تشغيل الكل">▶🔊</button>
         </div>
         <div id="detailContent"></div>
     </div>
@@ -258,6 +286,7 @@ const THEME_EXTRA = {
 37:{meinungDe:"Tierversuche sind ein ethisches Dilemma. Wir brauchen sie für medizinischen Fortschritt, aber Alternativen sollten mehr gefördert werden.",meinungAr:"تجارب الحيوانات معضلة أخلاقية. نحتاجها للتقدم الطبي، لكن البدائل يجب أن تدعم أكثر.",erfahrungDe:"Im Biologiestudium begleitete ich einen Tierversuch. Wissenschaftlich wichtig, aber ich hatte ein schlechtes Gewissen.",erfahrungAr:"في دراسة الأحياء رافقت تجربة على الحيوانات. مهم علمياً لكن ضميري كان يعذبني."},
 38:{meinungDe:"Hausfrau zu sein ist eine persönliche Entscheidung. Jede Frau sollte selbst wählen dürfen. Die Gesellschaft sollte beides akzeptieren.",meinungAr:"ربة البيت قرار شخصي. كل امرأة تختار بنفسها. على المجتمع تقبل كلا الخيارين.",erfahrungDe:"Meine Mutter war Hausfrau und sehr glücklich. Meine Schwester arbeitet Vollzeit und ist auch glücklich. Beides ist okay.",erfahrungAr:"والدتي كانت ربة بيت وسعيدة جداً. أختي تعمل دوام كامل وسعيدة أيضاً. كلا الأمرين مقبول."},
 };
+function getExam(id) { try { return THEME_EXAM[id] } catch(e) { return null } }
 function patchThemes() {
     THEMES.forEach(t => {
         const e = THEME_EXTRA[t.id];
@@ -322,10 +351,12 @@ function saveSectionFromTheme(sectionId, themeId) {
 // INIT
 // ============================================================
 function init() {
-    patchThemes();
-    document.getElementById('examBtn').classList.toggle('on', state.exam);
-    updateStats();
-    render();
+    try {
+        patchThemes();
+        document.getElementById('examBtn').classList.toggle('on', state.exam);
+        updateStats();
+        render();
+    } catch(e) { console.error('init error:', e); }
 }
 // ============================================================
 // TABS
@@ -348,31 +379,381 @@ function switchTab(tab) {
 }
 function filterThemes() { render(); }
 // ============================================================
+// VERB DICTIONARY & WORD LOOKUP
+// ============================================================
+const VERB_DICT = {
+    // sein
+    "sein":"يكون","ist":"يكون","sind":"يكون","seid":"أنتم تكونون","bin":"أنا أكون","bist":"أنت تكون","war":"كان","warst":"كنت","waren":"كانوا","wart":"كنتم","gewesen":"كان",
+    // haben
+    "haben":"يملك","habe":"أملك","hast":"تملك","hat":"يملك","hatte":"كان يملك","hatten":"كانوا يملك","hattet":"كنتم تملكون","gehabt":"ملك",
+    // werden
+    "werden":"يصبح","werde":"أصبح","wirst":"تصبح","wird":"يصبح","wurde":"أصبح","wurden":"أصبحوا","worden":"أصبح","geworden":"أصبح",
+    // modal verbs
+    "können":"يستطيع","kann":"يستطيع","kannst":"تستطيع","könnt":"تستطيعون","konnte":"استطاع","konntest":"استطعت","konnten":"استطاعوا","gekonnt":"استطاع",
+    "müssen":"يجب","muss":"يجب","musst":"يجب عليك","müsst":"يجب عليكم","musste":"كان يجب","mussten":"كان يجب","gemusst":"كان يجب",
+    "sollen":"ينبغي","soll":"ينبغي","sollst":"ينبغي لك","sollt":"ينبغي لكم","sollte":"كان ينبغي","sollten":"كان ينبغي","gesollt":"ينبغي",
+    "wollen":"يريد","will":"يريد","willst":"تريد","wollt":"تريدون","wollte":"أراد","wollten":"أرادوا","gewollt":"أراد",
+    "dürfen":"يُسمح له","darf":"يُسمح","darfst":"يُسمح لك","dürft":"يُسمح لكم","durfte":"سُمح له","durften":"سُمح لهم","gedurft":"سُمح",
+    "mögen":"يحب/يرغب","mag":"يحب","magst":"تحب","mögt":"تحبون","mochte":"أحب","mochten":"أحبوا","gemocht":"أحب",
+    // common verbs
+    "machen":"يفعل/يعمل","mache":"أفعل","machst":"تفعل","macht":"يفعل","machte":"فعل","machten":"فعلوا","gemacht":"فعل",
+    "sagen":"يقول","sage":"أقول","sagst":"تقول","sagt":"يقول","sagte":"قال","sagten":"قالوا","gesagt":"قال",
+    "geben":"يعطي","gebe":"أعطي","gibst":"تعطي","gibt":"يعطي","gab":"أعطى","gaben":"أعطوا","gegeben":"أعطى",
+    "kommen":"يأتي","komme":"آتي","kommst":"تأتي","kommt":"يأتي","kam":"جاء","kamen":"جاءوا","gekommen":"جاء",
+    "gehen":"يذهب","gehe":"أذهب","gehst":"تذهب","geht":"يذهب","ging":"ذهب","gingen":"ذهبوا","gegangen":"ذهب",
+    "sehen":"يرى","sehe":"أرى","siehst":"ترى","sieht":"يرى","sah":"رأى","sahen":"رأوا","gesehen":"رأى",
+    "wissen":"يعرف","weiß":"يعرف","weißt":"تعرف","wisst":"تعرفون","wusste":"عرف","wussten":"عرفوا","gewusst":"عرف",
+    "lassen":"يدع/يترك","lasse":"أدع","lässt":"يدع","ließ":"ترك","ließen":"تركوا","gelassen":"ترك",
+    "stehen":"يقف","stehe":"أقف","stehst":"تقف","steht":"يقف","stand":"وقف","standen":"وقفوا","gestanden":"وقف",
+    "halten":"يمسك/يحافظ","halte":"أمسك","hält":"يمسك","hielt":"أمسك","hielten":"أمسكوا","gehalten":"أمسك",
+    "bringen":"يجلب","bringe":"أجلب","bringst":"تجلب","bringt":"يجلب","brachte":"جلب","brachten":"جلبوا","gebracht":"جلب",
+    "nehmen":"يأخذ","nehme":"آخذ","nimmst":"تأخذ","nimmt":"يأخذ","nahm":"أخذ","nahmen":"أخذوا","genommen":"أخذ",
+    "tun":"يفعل","tue":"أفعل","tust":"تفعل","tut":"يفعل","tat":"فعل","taten":"فعلوا","getan":"فعل",
+    "denken":"يفكر","denke":"أفكر","denkst":"تفكر","denkt":"يفكر","dachte":"فكر","dachten":"فكروا","gedacht":"فكر",
+    "finden":"يجد","finde":"أجد","findest":"تجد","findet":"يجد","fand":"وجد","fanden":"وجدوا","gefunden":"وجد",
+    "helfen":"يساعد","helfe":"أساعد","hilfst":"تساعد","hilft":"يساعد","half":"ساعد","halfen":"ساعدوا","geholfen":"ساعد",
+    "leben":"يعيش","lebe":"أعيش","lebst":"تعيش","lebt":"يعيش","lebte":"عاش","lebten":"عاشوا","gelebt":"عاش",
+    "arbeiten":"يعمل","arbeite":"أعمل","arbeitest":"تعمل","arbeitet":"يعمل","arbeitete":"عمل","arbeiteten":"عملوا","gearbeitet":"عمل",
+    "brauchen":"يحتاج","brauche":"أحتاج","brauchst":"تحتاج","braucht":"يحتاج","brauchte":"احتاج","brauchten":"احتاجوا","gebraucht":"احتاج",
+    "stellen":"يضع","stelle":"أضع","stellst":"تضع","stellt":"يضع","stellte":"وضع","stellten":"وضعوا","gestellt":"وضع",
+    "setzen":"يضع/يجلس","setze":"أضع","setzt":"يضع","setzte":"وضع","setzten":"وضعوا","gesetzt":"وضع",
+    "erklären":"يشرح","erkläre":"أشرح","erklärst":"تشرح","erklärt":"يشرح","erklärte":"شرح","erklärten":"شرحوا","erklärt":"شرح",
+    "meinen":"يعني/يعتقد","meine":"أعني","meinst":"تعني","meint":"يعني","meinte":"عنى","meinten":"عنوا","gemeint":"عنى",
+    "glauben":"يعتقد","glaube":"أعتقد","glaubst":"تعتقد","glaubt":"يعتقد","glaubte":"اعتقد","glaubten":"اعتقدوا","geglaubt":"اعتقد",
+    "nennen":"يسمي","nenne":"أسمي","nennst":"تسمي","nennt":"يسمي","nannte":"سمى","nannten":"سموا","genannt":"سمى",
+    "führen":"يقود","führe":"أقود","führst":"تقود","führt":"يقود","führte":"قاد","führten":"قادوا","geführt":"قاد",
+    "bieten":"يقدم","biete":"أقدم","bietest":"تقدم","bietet":"يقدم","bot":"قدم","boten":"قدموا","geboten":"قدم",
+    "schaffen":"يخلق/ينجز","schaffe":"أخلق","schaffst":"تخلق","schafft":"يخلق","schaffte":"خلق","schafften":"خلقوا","geschafft":"خلق",
+    "erhalten":"يحصل","erhalte":"أحصل","erhältst":"تحصل","erhält":"يحصل","erhielt":"حصل","erhielten":"حصلوا","erhalten":"حصل",
+    "entwickeln":"يطور","entwickle":"أطور","entwickelst":"تطور","entwickelt":"يطور","entwickelte":"طور","entwickelten":"طوروا","entwickelt":"طور",
+    "verbessern":"يحسن","verbessere":"أحسن","verbesserst":"تحسن","verbessert":"يحسن","verbesserte":"حسن","verbesserten":"حسنوا","verbessert":"حسن",
+    "verändern":"يغير","verändere":"أغير","veränderst":"تغير","verändert":"يغير","veränderte":"غير","veränderten":"غيروا","verändert":"غير",
+    "nutzen":"يستخدم","nutze":"أستخدم","nutzt":"يستخدم","nutzte":"استخدم","nutzten":"استخدموا","genutzt":"استخدم",
+    "verstehen":"يفهم","verstehe":"أفهم","verstehst":"تفهم","versteht":"يفهم","verstand":"فهم","verstanden":"فهموا","verstanden":"فهم",
+    "lernen":"يتعلم","lerne":"أتعلم","lernst":"تتعلم","lernt":"يتعلم","lernte":"تعلم","lernten":"تعلموا","gelernt":"تعلم",
+    "besuchen":"يزور","besuche":"أزور","besuchst":"تزور","besucht":"يزور","besuchte":"زار","besuchten":"زاروا","besucht":"زار",
+    "diskutieren":"يناقش","diskutiere":"أناقش","diskutierst":"تناقش","diskutiert":"يناقش","diskutierte":"ناقش","diskutierten":"ناقشوا","diskutiert":"ناقش",
+    "erwähnen":"يذكر","erwähne":"أذكر","erwähnst":"تذكر","erwähnt":"يذكر","erwähnte":"ذكر","erwähnten":"ذكروا","erwähnt":"ذكر",
+    "beschreiben":"يصف","beschreibe":"أصف","beschreibst":"تصف","beschreibt":"يصف","beschrieb":"وصف","beschrieben":"وصفوا","beschrieben":"وصف",
+    "entscheiden":"يقرر","entscheide":"أقرر","entscheidest":"تقرر","entscheidet":"يقرر","entschied":"قرر","entschieden":"قرروا","entschieden":"قرر",
+    "erwarten":"يتوقع","erwarte":"أتوقع","erwartest":"تتوقع","erwartet":"يتوقع","erwartete":"توقع","erwarteten":"توقعوا","erwartet":"توقع",
+    "aufwachsen":"ينشأ","wachse auf":"أنشأ","wächst auf":"ينشأ","wuchs auf":"نشأ","wuchsen auf":"نشأوا","aufgewachsen":"نشأ",
+    "verbringen":"يقضي","verbringe":"أقضي","verbringst":"تقضي","verbringt":"يقضي","verbrachte":"قضى","verbrachten":"قضوا","verbracht":"قضى",
+    "unterrichten":"يُدرّس","unterrichte":"أدرّس","unterrichtest":"تدرّس","unterrichtet":"يُدرّس","unterrichtete":"درّس","unterrichteten":"درّسوا","unterrichtet":"درّس",
+    "betreffen":"يتعلق بـ","betrifft":"يتعلق بـ","betraf":"تعلق","betroffen":"متعلق",
+    "anbieten":"يعرض/يقدم","biete an":"أعرض","bietest an":"تعرض","bietet an":"يعرض","bot an":"عرض","boten an":"عرضوا","angeboten":"عرض",
+    "annehmen":"يقبل","nehme an":"أقبل","nimmst an":"تقبل","nimmt an":"يقبل","nahm an":"قبل","nahmen an":"قبلوا","angenommen":"قبل",
+    "aussehen":"يبدو","sehe aus":"أبدو","siehst aus":"تبدو","sieht aus":"يبدو","sah aus":"بدا","sahen aus":"بدوا","ausgesehen":"بدا",
+    "bedeuten":"يعني","bedeute":"أعني","bedeutest":"تعني","bedeutet":"يعني","bedeutete":"عنى","bedeuteten":"عنوا","bedeutet":"عنى",
+    "beginnen":"يبدأ","beginne":"أبدأ","beginnst":"تبدأ","beginnt":"يبدأ","begann":"بدأ","begannen":"بدأوا","begonnen":"بدأ",
+    "bekommen":"يحصل","bekomme":"أحصل","bekommst":"تحصل","bekommt":"يحصل","bekam":"حصل","bekamen":"حصلوا","bekommen":"حصل",
+    "berichten":"يُخبر","berichte":"أخبر","berichtest":"تخبر","berichtet":"يُخبر","berichtete":"أخبر","berichteten":"أخبروا","berichtet":"أخبر",
+    "bestehen":"يتكون/ينجح","bestehe":"أتكون","bestehst":"تتكون","besteht":"يتكون","bestand":"تكون","bestanden":"تكونوا","bestanden":"تكون",
+    "bezahlen":"يدفع","bezahle":"أدفع","bezahlst":"تدفع","bezahlt":"يدفع","bezahlte":"دفع","bezahlten":"دفعوا","bezahlt":"دفع",
+    "beziehen":"يشير إلى","beziehe":"أشير","beziehst":"تشير","bezieht":"يشير","bezog":"أشار","bezogen":"أشاروا","bezogen":"أشار",
+    "danken":"يشكر","danke":"أشكر","dankst":"تشكر","dankt":"يشكر","dankte":"شكر","dankten":"شكروا","gedankt":"شكر",
+    "einladen":"يدعو","lade ein":"أدعو","lädst ein":"تدعو","lädt ein":"يدعو","lud ein":"دعا","luden ein":"دعوا","eingeladen":"دعا",
+    "empfehlen":"يوصي","empfehle":"أوصي","empfiehlst":"توصي","empfiehlt":"يوصي","empfahl":"أوصى","empfahlen":"أوصوا","empfohlen":"أوصى",
+    "enthalten":"يحتوي","enthalte":"أحتوي","enthältst":"تحتوي","enthält":"يحتوي","enthielt":"احتوى","enthielten":"احتوت","enthalten":"احتوى",
+    "entstehen":"ينشأ","entstehe":"أنشأ","entstehst":"تنشأ","entsteht":"ينشأ","entstand":"نشأ","entstanden":"نشأوا","entstanden":"نشأ",
+    "erfahren":"يعلم/يختبر","erfahre":"أعلم","erfährst":"تعلم","erfährt":"يعلم","erfuhr":"علم","erfuhren":"علموا","erfahren":"علم",
+    "erfüllen":"يحقق","erfülle":"أحقق","erfüllst":"تحقق","erfüllt":"يحقق","erfüllte":"حقق","erfüllten":"حققوا","erfüllt":"حقق",
+    "erkennen":"يتعرف/يدرك","erkenne":"أتعرف","erkennst":"تتعرف","erkennt":"يتعرف","erkannte":"تعرف","erkannten":"تعرفوا","erkannt":"تعرف",
+    "erscheinen":"يظهر","erscheine":"أظهر","erscheinst":"تظهر","erscheint":"يظهر","erschien":"ظهر","erschienen":"ظهروا","erschienen":"ظهر",
+    "erziehen":"يربي","erziehe":"أربي","erziehst":"تربي","erzieht":"يربي","erzog":"ربى","erzogen":"ربّوا","erzogen":"ربى",
+    "fehlen":"يفتقد/ينقص","fehle":"أفتقد","fehlst":"تفتقد","fehlt":"يفتقد","fehlte":"افتقد","fehlten":"افتقدوا","gefehlt":"افتقد",
+    "fördern":"يشجع/يدعم","fördere":"أشجع","förderst":"تشجع","fördert":"يشجع","förderte":"شجع","förderten":"شجعوا","gefördert":"شجع",
+    "genießen":"يستمتع","genieße":"أستمتع","genießt":"تستمتع","genoss":"استمتع","genossen":"استمتعوا","genossen":"استمتع",
+    "gewinnen":"يفوز/يكسب","gewinne":"أفوز","gewinnst":"تفوز","gewinnt":"يفوز","gewann":"فاز","gewannen":"فازوا","gewonnen":"فاز",
+    "informieren":"يُخبر/يُعلم","informiere":"أخبر","informierst":"تخبر","informiert":"يُخبر","informierte":"أخبر","informierten":"أخبروا","informiert":"أخبر",
+    "kümmern":"يهتم بـ","kümmere":"أهتم","kümmerst":"تهتم","kümmert":"يهتم","kümmerte":"اهتم","kümmerten":"اهتموا","gekümmert":"اهتم",
+    "liegen":"يكمن/يقع","liege":"أكمن","liegst":"تكمن","liegt":"يكمن","lag":"كان","lagen":"كانوا","gelegen":"كان",
+    "lösen":"يحل","löse":"أحل","löst":"تحل","löste":"حل","lösten":"حلوا","gelöst":"حل",
+    "suchen":"يبحث","suche":"أبحث","suchst":"تبحث","sucht":"يبحث","suchte":"بحث","suchten":"بحثوا","gesucht":"بحث",
+    "teilen":"يشارك/يقسم","teile":"أشارك","teilst":"تشارك","teilt":"يشارك","teilte":"شارك","teilten":"شاركوا","geteilt":"شارك",
+    "tragen":"يحمل/يلبس","trage":"أحمل","trägst":"تحمل","trägt":"يحمل","trug":"حمل","trugen":"حملوا","getragen":"حمل",
+    "treffen":"يقابل","treffe":"أقابل","triffst":"تقابل","trifft":"يقابل","traf":"قابل","trafen":"قابلوا","getroffen":"قابل",
+    "scheinen":"يبدو","scheine":"أبدو","scheinst":"تبدو","scheint":"يبدو","schien":"بدا","schienen":"بدوا","geschienen":"بدا",
+    "schließen":"يغلق/يستنتج","schließe":"أغلق","schließt":"يغلق","schloss":"أغلق","schlossen":"أغلقوا","geschlossen":"أغلق",
+    "schreiben":"يكتب","schreibe":"أكتب","schreibst":"تكتب","schreibt":"يكتب","schrieb":"كتب","schrieben":"كتبوا","geschrieben":"كتب",
+    "schützen":"يحمي","schütze":"أحمي","schützt":"تحمي","schützte":"حمى","schützten":"حموا","geschützt":"حمى",
+    "spielen":"يلعب","spiele":"ألعب","spielst":"تلعب","spielt":"يلعب","spielte":"لعب","spielten":"لعبوا","gespielt":"لعب",
+    "stattfinden":"يُقام","finde statt":"يُقام","findet statt":"يُقام","fand statt":"أُقيم","fanden statt":"أُقيمت","stattgefunden":"أُقيم",
+    "stimmen":"يصح/يصوّت","stimme":"أصوّت","stimmst":"تصوّت","stimmt":"يصح","stimmte":"صوّت","stimmten":"صوّتوا","gestimmt":"صوّت",
+    "überlegen":"يفكر","überlege":"أفكر","überlegst":"تفكر","überlegt":"يفكر","überlegte":"فكر","überlegten":"فكروا","überlegt":"فكر",
+    "verbinden":"يربط","verbinde":"أربط","verbindest":"تربط","verbindet":"يربط","verband":"ربط","verbanden":"ربطوا","verbunden":"ربط",
+    "vergleichen":"يقارن","vergleiche":"أقارن","vergleichst":"تقارن","vergleicht":"يقارن","verglich":"قارن","verglichen":"قارنوا","verglichen":"قارن",
+    "verlieren":"يفقد/يخسر","verliere":"أفقد","verlierst":"تفقد","verliert":"يفقد","verlor":"فقد","verloren":"فقدوا","verloren":"فقد",
+    "vermeiden":"يتجنب","vermeide":"أتجنب","vermeidest":"تتجنب","vermeidet":"يتجنب","vermied":"تجنب","vermieden":"تجنبوا","vermieden":"تجنب",
+    "versprechen":"يعد/يتعهد","verspreche":"أعد","versprichst":"تعد","verspricht":"يعد","versprach":"وعد","versprachen":"وعدوا","versprochen":"وعد",
+    "vertreten":"يمثل","vertrete":"أمثل","vertrittst":"تمثل","vertritt":"يمثل","vertrat":"مثل","vertraten":"مثلوا","vertreten":"مثل",
+    "verursachen":"يسبب","verursache":"أسبب","verursachst":"تسبب","verursacht":"يسبب","verursachte":"سبب","verursachten":"سببوا","verursacht":"سبب",
+    "verwenden":"يستخدم","verwende":"أستخدم","verwendest":"تستخدم","verwendet":"يستخدم","verwendete":"استخدم","verwendeten":"استخدموا","verwendet":"استخدم",
+    "vorbereiten":"يحضر","bereite vor":"أحضر","bereitest vor":"تحضر","bereitet vor":"يحضر","bereitete vor":"حضر","bereiteten vor":"حضروا","vorbereitet":"حضر",
+    "vorschlagen":"يقترح","schlage vor":"أقترح","schlägst vor":"تقترح","schlägt vor":"يقترح","schlug vor":"اقترح","schlugen vor":"اقترحوا","vorgeschlagen":"اقترح",
+    "wachsen":"ينمو","wachse":"أنمو","wächst":"ينمو","wuchs":"نما","wuchsen":"نمت","gewachsen":"نما",
+    "wählen":"يختار","wähle":"أختار","wählst":"تختار","wählt":"يختار","wählte":"اختار","wählten":"اختاروا","gewählt":"اختار",
+    "wiederholen":"يكرر","wiederhole":"أكرر","wiederholst":"تكرر","wiederholt":"يكرر","wiederholte":"كرر","wiederholten":"كرروا","wiederholt":"كرر",
+    "wirken":"يؤثر/يعمل","wirke":"أؤثر","wirkst":"تؤثر","wirkt":"يؤثر","wirkte":"أثر","wirkten":"أثروا","gewirkt":"أثر",
+    "wünschen":"يتمنى","wünsche":"أتمنى","wünschst":"تتمنى","wünscht":"يتمنى","wünschte":"تمنى","wünschten":"تمنوا","gewünscht":"تمنى",
+    "zahlen":"يدفع","zahle":"أدفع","zahlst":"تدفع","zahlt":"يدفع","zahlte":"دفع","zahlten":"دفعوا","gezahlt":"دفع",
+    "ziehen":"يسحب/ينتقل","ziehe":"أسحب","ziehst":"تسحب","zieht":"يسحب","zog":"سحب","zogen":"سحبوا","gezogen":"سحب",
+    "zustimmen":"يوافق","stimme zu":"أوافق","stimmst zu":"توافق","stimmt zu":"يوافق","stimmte zu":"وافق","stimmten zu":"وافقوا","zugestimmt":"وافق",
+    "zwingen":"يجبر","zwinge":"أجبر","zwingst":"تجبر","zwingt":"يجبر","zwang":"أجبر","zwangen":"أجبروا","gezwungen":"أجبر",
+    // additional B2-level verbs
+    "ermöglichen":"يُمكّن","ermögliche":"أُمكّن","ermöglichst":"تُمكّن","ermöglicht":"يُمكّن","ermöglichte":"مكّن","ermöglichten":"مكّنوا","ermöglicht":"مكّن",
+    "beeinflussen":"يؤثّر","beeinflusse":"أؤثّر","beeinflusst":"تؤثّر","beeinflusste":"أثّر","beeinflussten":"أثّروا","beeinflusst":"أثّر",
+    "betonen":"يؤكّد","betone":"أؤكّد","betonst":"تؤكّد","betont":"يؤكّد","betonte":"أكّد","betonten":"أكّدوا","betont":"أكّد",
+    "beitragen":"يساهم","trage bei":"أساهم","trägst bei":"تساهم","trägt bei":"يساهم","trug bei":"ساهم","trugen bei":"ساهموا","beigetragen":"ساهم",
+    "unterscheiden":"يميّز","unterscheide":"أميّز","unterscheidest":"تميّز","unterscheidet":"يميّز","unterschied":"ميّز","unterschieden":"ميّزوا","unterschieden":"ميّز",
+    "äußern":"يُعبّر","äußere":"أعبّر","äußerst":"تُعبّر","äußert":"يُعبّر","äußerte":"عبّر","äußerten":"عبّروا","geäußert":"عبّر",
+    "behandeln":"يعالج/يتناول","behandle":"أعالج","behandelst":"تعالج","behandelt":"يعالج","behandelte":"عالج","behandelten":"عالجوا","behandelt":"عالج",
+    "berücksichtigen":"يراعي","berücksichtige":"أراعي","berücksichtigst":"تراعي","berücksichtigt":"يراعي","berücksichtigte":"راعى","berücksichtigten":"راعوا","berücksichtigt":"راعى",
+    "betrachten":"ينظر/يعتبر","betrachte":"أنظر","betrachtest":"تنظر","betrachtet":"ينظر","betrachtete":"نظر","betrachteten":"نظروا","betrachtet":"نظر",
+    "durchführen":"ينفّذ","führe durch":"أنفّذ","führst durch":"تنفّذ","führt durch":"ينفّذ","führte durch":"نفّذ","führten durch":"نفّذوا","durchgeführt":"نفّذ",
+    "ergänzen":"يكمّل","ergänze":"أكمّل","ergänzt":"تكمّل","ergänzte":"كمّل","ergänzten":"كمّلوا","ergänzt":"كمّل",
+    "ersetzen":"يستبدل","ersetze":"أستبدل","ersetzt":"يستبدل","ersetzte":"استبدل","ersetzten":"استبدلوا","ersetzt":"استبدل",
+    "gestalten":"يصمّم","gestalte":"أصمّم","gestaltest":"تصمّم","gestaltet":"يصمّم","gestaltete":"صمّم","gestalteten":"صمّموا","gestaltet":"صمّم",
+    "gründen":"يؤسّس","gründe":"أؤسّس","gründest":"تؤسّس","gründet":"يؤسّس","gründete":"أسّس","gründeten":"أسّسوا","gegründet":"أسّس",
+    "konzentrieren":"يُركز","konzentriere":"أركّز","konzentrierst":"تركّز","konzentriert":"يُركز","konzentrierte":"ركّز","konzentrierten":"ركّزوا","konzentriert":"ركّز",
+    "reagieren":"يستجيب/يتفاعل","reagiere":"أستجيب","reagierst":"تستجيب","reagiert":"يستجيب","reagierte":"استجاب","reagierten":"استجابوا","reagiert":"استجاب",
+    "reduzieren":"يقلّل","reduziere":"أقلّل","reduzierst":"تقلّل","reduziert":"يقلّل","reduzierte":"قلّل","reduzierten":"قلّلوا","reduziert":"قلّل",
+    "steigen":"يرتفع","steige":"أرتفع","steigst":"ترتفع","steigt":"يرتفع","stieg":"ارتفع","stiegen":"ارتفعوا","gestiegen":"ارتفع",
+    "sinken":"ينخفض","sinke":"أنخفض","sinkst":"تنخفض","sinkt":"ينخفض","sank":"انخفض","sanken":"انخفضوا","gesunken":"انخفض",
+    "verlangen":"يطلب","verlange":"أطلب","verlangst":"تطلب","verlangt":"يطلب","verlangte":"طلب","verlangten":"طلبوا","verlangt":"طلب",
+    "verteilen":"يوزّع","verteile":"أوزّع","verteilst":"توزّع","verteilt":"يوزّع","verteilte":"وزّع","verteilten":"وزّعوا","verteilt":"وزّع",
+    "wahrnehmen":"يدرك","nehme wahr":"أدرك","nimmst wahr":"تدرك","nimmt wahr":"يدرك","nahm wahr":"أدرك","nahmen wahr":"أدركوا","wahrgenommen":"أدرك",
+    "überwinden":"يتغلّب","überwinde":"أتغلّب","überwindest":"تتغلّب","überwindet":"يتغلّب","überwand":"تغلّب","überwanden":"تغلّبوا","überwunden":"تغلّب",
+    "überzeugen":"يقنع","überzeuge":"أقنع","überzeugst":"تقنع","überzeugt":"يقنع","überzeugte":"أقنع","überzeugten":"أقنعوا","überzeugt":"أقنع",
+    "abhängen":"يعتمد","hänge ab":"أعتمد","hängst ab":"تعتمد","hängt ab":"يعتمد","hing ab":"اعتمد","hingen ab":"اعتمدوا","abgehangen":"اعتمد",
+    "ankommen":"يصل","komme an":"أصل","kommst an":"تصل","kommt an":"يصل","kam an":"وصل","kamen an":"وصلوا","angekommen":"وصل",
+    "ausdrücken":"يعبّر","drücke aus":"أعبّر","drückst aus":"تعبّر","drückt aus":"يعبّر","drückte aus":"عبّر","drückten aus":"عبّروا","ausgedrückt":"عبّر",
+    "beantworten":"يجيب","beantworte":"أجيب","beantwortest":"تجيب","beantwortet":"يجيب","beantwortete":"أجاب","beantworteten":"أجابوا","beantwortet":"أجاب",
+    "bewerten":"يقيّم","bewerte":"أقيّم","bewertest":"تقيّم","bewertet":"يقيّم","bewertete":"قيّم","bewerteten":"قيّموا","bewertet":"قيّم",
+    "einhalten":"يلتزم","halte ein":"ألتزم","hältst ein":"تلتزم","hält ein":"يلتزم","hielt ein":"التزم","hielten ein":"التزموا","eingehalten":"التزم",
+    "teilnehmen":"يشارك","nehme teil":"أشارك","nimmst teil":"تشارك","nimmt teil":"يشارك","nahm teil":"شارك","nahmen teil":"شاركوا","teilgenommen":"شارك",
+    "zusammenfassen":"يلخّص","fasse zusammen":"ألخّص","fasst zusammen":"تلخّص","fasste zusammen":"لخّص","fassten zusammen":"لخّصوا","zusammengefasst":"لخّص",
+};
+
+let currentWordPopup = null;
+
+function showWordMeaning(event, word) {
+    event.stopPropagation();
+    if (currentWordPopup) { currentWordPopup.remove(); currentWordPopup = null; }
+    const w = word.replace(/[.,!?;:()"'\u2018\u2019\u201C\u201D\u2013\u2014\u00ab\u00bb]/g,'').toLowerCase().trim();
+    const meaning = VERB_DICT[w];
+    const popup = document.createElement('div');
+    popup.className = 'word-popup';
+    const escapedWord = word.replace(/'/g,"\\'");
+    const encodedWord = encodeURIComponent(word);
+    let html = `<div class="wp-word">${word}</div>`;
+    if (meaning) {
+        html += `<div class="wp-meaning">🇸🇦 ${meaning}</div>`;
+    } else {
+        html += `<div class="wp-hint">⏳ Lade Übersetzung...</div>`;
+    }
+    html += `<div class="wp-actions">
+        <button class="wp-btn" onclick="speakWord('${escapedWord}');this.classList.toggle('playing')">🔊 Audio</button>
+        <button class="wp-btn" onclick="window.open('https://www.dict.cc/?s=${encodedWord}','_blank')">📖 dict.cc</button>
+        <button class="wp-btn" onclick="this.closest('.word-popup').remove();currentWordPopup=null">✕</button>
+    </div>`;
+    popup.innerHTML = html;
+    const x = Math.min(event.clientX || event.touches?.[0]?.clientX || 0, window.innerWidth - 240);
+    const y = Math.min(event.clientY || event.touches?.[0]?.clientY || 0, window.innerHeight - 170);
+    popup.style.left = Math.max(8, x) + 'px';
+    popup.style.top = Math.max(8, y + 8) + 'px';
+    document.body.appendChild(popup);
+    currentWordPopup = popup;
+    // Fetch translation from MyMemory API if not in dictionary
+    if (!meaning) {
+        fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(w) + '&langpair=de|ar')
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+                if (popup.parentNode && data.responseData && data.responseData.translatedText) {
+                    var t = data.responseData.translatedText;
+                    var hint = popup.querySelector('.wp-hint');
+                    if (hint) {
+                        if (t.toLowerCase() !== w.toLowerCase()) {
+                            hint.innerHTML = '🇸🇦 ' + t;
+                            hint.className = 'wp-meaning';
+                        } else {
+                            hint.innerHTML = '⚠️ Keine Übersetzung gefunden';
+                        }
+                    }
+                }
+            })
+            .catch(function(){
+                var hint = popup.querySelector('.wp-hint');
+                if (hint) hint.innerHTML = '⚠️ Übersetzungsfehler';
+            });
+    }
+    // Close on outside click
+    setTimeout(function(){
+        var closer = function(e) { if (currentWordPopup && !currentWordPopup.contains(e.target)) { currentWordPopup.remove(); currentWordPopup = null; document.removeEventListener('click', closer); document.removeEventListener('touchstart', closer); } };
+        document.addEventListener('click', closer, { once: true });
+        document.addEventListener('touchstart', closer, { once: true });
+    }, 200);
+}
+
+function speakWord(word) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        document.querySelectorAll('.tts-btn.playing').forEach(function(b){b.classList.remove('playing');});
+        var utter = new SpeechSynthesisUtterance(word);
+        utter.lang = 'de-DE';
+        utter.rate = 0.82;
+        var v = getVoice(); if (v) utter.voice = v;
+        window.speechSynthesis.speak(utter);
+    }
+}
+function speakText(btn, text) {
+    if ('speechSynthesis' in window) {
+        if (btn.classList.contains('playing')) {
+            window.speechSynthesis.cancel();
+            btn.classList.remove('playing');
+            return;
+        }
+        window.speechSynthesis.cancel();
+        document.querySelectorAll('.tts-btn.playing').forEach(function(b){b.classList.remove('playing');});
+        btn.classList.add('playing');
+        var utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'de-DE';
+        utter.rate = 0.82;
+        var v = getVoice(); if (v) utter.voice = v;
+        utter.onend = function(){ btn.classList.remove('playing'); };
+        utter.onerror = function(){ btn.classList.remove('playing'); };
+        window.speechSynthesis.speak(utter);
+    }
+}
+function playAllTheme() {
+    var t = state.currentTheme;
+    if (!t) return;
+    var btn = document.getElementById('playAllBtn');
+    var texts = [];
+    if (t.textDe) texts.push(t.textDe);
+    var ex = getExam(t.id);
+    if (ex && ex.teil2De) texts.push(ex.teil2De);
+    if (t.meinungDe) texts.push(t.meinungDe);
+    if (t.erfahrungDe) texts.push(t.erfahrungDe);
+    if (t.problem) {
+        var pDe = (ex && ex.teil3De) || t.problem.textDe;
+        if (pDe) texts.push(pDe);
+    }
+    var full = texts.join('. ').replace(/\s+/g,' ');
+    if (!full) return;
+    if ('speechSynthesis' in window) {
+        if (btn.classList.contains('playing')) {
+            window.speechSynthesis.cancel();
+            btn.classList.remove('playing');
+            return;
+        }
+        window.speechSynthesis.cancel();
+        document.querySelectorAll('.tts-btn.playing').forEach(function(b){b.classList.remove('playing');});
+        btn.classList.add('playing');
+        var utter = new SpeechSynthesisUtterance(full);
+        utter.lang = 'de-DE';
+        utter.rate = 0.82;
+        var v = getVoice(); if (v) utter.voice = v;
+        utter.onend = function(){ btn.classList.remove('playing'); };
+        utter.onerror = function(){ btn.classList.remove('playing'); };
+        window.speechSynthesis.speak(utter);
+    }
+}
+// ============================================================
+// VOICE SELECTION
+// ============================================================
+var availableVoices = [];
+var selectedVoiceURI = localStorage.getItem('b2_voice') || '';
+
+function loadVoices() {
+    if (!('speechSynthesis' in window)) return;
+    var all = speechSynthesis.getVoices();
+    availableVoices = all.filter(function(v){ return v.lang && v.lang.startsWith('de'); });
+    var sel = document.getElementById('voiceSelect');
+    if (!sel) return;
+    if (!availableVoices.length) { sel.style.display = 'none'; return; }
+    var html = '<option value="">🇩🇪 Standard</option>';
+    availableVoices.forEach(function(v){
+        var label = v.name + (v.localService ? '' : ' ☁');
+        var selAttr = (selectedVoiceURI === v.voiceURI) ? 'selected' : '';
+        html += '<option value="' + v.voiceURI.replace(/"/g,'&quot;') + '" ' + selAttr + '>' + label + '</option>';
+    });
+    sel.innerHTML = html;
+    sel.style.display = 'inline-block';
+    // If none selected yet, prefer a female-sounding German voice
+    if (!selectedVoiceURI) {
+        var pref = availableVoices.find(function(v){ return /zira|heidi|anna|petra|yvonne|female|weiblich/i.test(v.name); }) || availableVoices[0];
+        if (pref) {
+            selectedVoiceURI = pref.voiceURI;
+            localStorage.setItem('b2_voice', selectedVoiceURI);
+            sel.value = selectedVoiceURI;
+        }
+    }
+}
+
+function setVoice(val) {
+    selectedVoiceURI = val;
+    if (val) localStorage.setItem('b2_voice', val);
+    else localStorage.removeItem('b2_voice');
+}
+
+function getVoice() {
+    if (!selectedVoiceURI) return null;
+    return availableVoices.find(function(v){ return v.voiceURI === selectedVoiceURI; }) || null;
+}
+
+// Load voices immediately (for browsers that have them sync) and on voiceschanged event
+if ('speechSynthesis' in window) {
+    loadVoices();
+    speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+
+function clickableText(text) {
+    if (!text) return '';
+    return text.replace(/([\w\u00C0-\u024F]+)/g, function(m) {
+        return '<span class="cw" onclick="showWordMeaning(event,\'' + m.replace(/'/g,"\\'") + '\')">' + m + '</span>';
+    });
+}
+
+// ============================================================
 // RENDER HELPERS
 // ============================================================
 function langSpan(de, ar){
-    if(em()) return `<div class="de-text">${de}</div>`;
-    return `<div class="de-text">${de}</div><div class="ar-text">${ar}</div>`;
+    if(em()) return `<div class="de-text">${clickableText(de)}</div>`;
+    return `<div class="de-text">${clickableText(de)}</div><div class="ar-text">${ar}</div>`;
 }
 function argCard(cls, de, ar){
-    if(em()) return `<div class="arg-card ${cls}"><div class="de-arg">${de}</div></div>`;
-    return `<div class="arg-card ${cls}"><div class="de-arg">${de}</div><div class="ar-arg">${ar}</div></div>`;
+    if(em()) return `<div class="arg-card ${cls}"><div class="de-arg">${clickableText(de)}</div></div>`;
+    return `<div class="arg-card ${cls}"><div class="de-arg">${clickableText(de)}</div><div class="ar-arg">${ar}</div></div>`;
 }
 function phraseBlock(de, ar){
-    if(em()) return `<div class="phrase-item"><div class="de-phrase">${de}</div></div>`;
-    return `<div class="phrase-item"><div class="de-phrase">${de}</div><div class="ar-phrase">${ar}</div></div>`;
+    if(em()) return `<div class="phrase-item"><div class="de-phrase">${clickableText(de)}</div></div>`;
+    return `<div class="phrase-item"><div class="de-phrase">${clickableText(de)}</div><div class="ar-phrase">${ar}</div></div>`;
 }
 function ideaBlock(de, ar){
-    if(em()) return `<div class="idea-item"><div class="de-idea">${de}</div></div>`;
-    return `<div class="idea-item"><div class="de-idea">${de}</div><div class="ar-idea">${ar}</div></div>`;
+    if(em()) return `<div class="idea-item"><div class="de-idea">${clickableText(de)}</div></div>`;
+    return `<div class="idea-item"><div class="de-idea">${clickableText(de)}</div><div class="ar-idea">${ar}</div></div>`;
+}
+function collapsibleSection(title, content, sectionId, themeId, ttsText){
+    let saveBtn = '';
+    let ttsBtn = '';
+    if (sectionId && themeId) saveBtn = `<button class="save-section-btn" id="saveSec_${sectionId}" onclick="saveSectionFromTheme('${sectionId}',${themeId})">📋</button>`;
+    if (ttsText) {
+        var escTts = ttsText.replace(/'/g,"\\'").replace(/\n/g,' ').replace(/\r/g,'');
+        ttsBtn = `<button class="tts-btn" onclick="event.stopPropagation();speakText(this,'${escTts}')">🔊</button>`;
+    }
+    return `<div class="section"><div class="section-title" onclick="toggleSection(this)"><span class="toggle-icon open">▶</span>${title}${ttsBtn}${saveBtn}</div><div class="section-content open"${sectionId?' id="section_'+sectionId+'_'+themeId+'"':''}>${content}</div></div>`;
 }
 // ============================================================
 // RENDER
 // ============================================================
 function render() {
-    updateStats();
-    if (state.tab === 'themes') renderThemes();
-    else if (state.tab === 'problems') renderProblems();
+    try { updateStats(); } catch(e) { console.error('updateStats error:', e); }
+    try {
+        if (state.tab === 'themes') renderThemes();
+        else if (state.tab === 'problems') renderProblems();
+    } catch(e) { console.error('render error:', e); }
 }
 function updateStats() {
     document.getElementById('statLearned').textContent = state.done.length;
@@ -384,55 +765,38 @@ function updateStats() {
     document.getElementById('statStreak').textContent = localStorage.getItem('b2_streak') || 0;
 }
 function renderThemes() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = THEMES.filter(t => t.titleDe.toLowerCase().includes(q) || t.titleAr.toLowerCase().includes(q));
-    const grid = document.getElementById('themeGrid');
-    if (!filtered.length) { grid.innerHTML = '<div class="empty-state"><div class="big">🔍</div>Kein Thema gefunden.</div>'; return; }
-    grid.innerHTML = filtered.map(t => {
-        const done = state.done.includes(t.id);
-        return `<div class="theme-item ${done?'done':''}" onclick="openTheme(${t.id})">
-            <div class="theme-check ${done?'done':''}" onclick="event.stopPropagation();toggleDone(${t.id})">${done?'✓':''}</div>
-            <div class="theme-icon">${t.icon}</div>
-            <div class="theme-info"><div class="theme-title">${t.titleDe}</div><div class="theme-sub">${t.titleAr}</div></div>
-            <div class="theme-tag">${t.id}</div>
-        </div>`;
-    }).join('');
+    try {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = THEMES.filter(t => t.titleDe.toLowerCase().includes(q) || t.titleAr.toLowerCase().includes(q));
+        const grid = document.getElementById('themeGrid');
+        if (!filtered.length) { grid.innerHTML = '<div class="empty-state"><div class="big">🔍</div>Kein Thema gefunden.</div>'; return; }
+        grid.innerHTML = filtered.map(t => {
+            const done = state.done.includes(t.id);
+            return `<div class="theme-item ${done?'done':''}" onclick="openTheme(${t.id})">
+                <div class="theme-check ${done?'done':''}" onclick="event.stopPropagation();toggleDone(${t.id})">${done?'✓':''}</div>
+                <div class="theme-icon">${t.icon}</div>
+                <div class="theme-info"><div class="theme-title">${t.titleDe}</div><div class="theme-sub">${t.titleAr}</div></div>
+                <div class="theme-tag">${t.id}</div>
+            </div>`;
+        }).join('');
+    } catch(e) { console.error('renderThemes error:', e); document.getElementById('themeGrid').innerHTML = '<div style="padding:20px;text-align:center;color:var(--red)">Fehler beim Laden: ' + e.message + '</div>'; }
 }
 function renderProblems() {
+    const grid = document.getElementById('themeGrid');
     const q = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = THEMES.filter(t => t.problem && (t.problem.titleDe.toLowerCase().includes(q) || t.problem.titleAr.toLowerCase().includes(q)));
-    const grid = document.getElementById('themeGrid');
-    if (!filtered.length) { grid.innerHTML = '<div class="empty-state"><div class="big">💡</div>Keine Aufgabe gefunden.</div>'; return; }
-    grid.innerHTML = filtered.map(t =>
-        `<div class="theme-item" onclick="openProblem(${t.id})">
-            <div class="theme-icon">${t.icon}</div>
-            <div class="theme-info"><div class="theme-title">${t.problem.titleDe}</div><div class="theme-sub">${t.titleDe}</div></div>
-        </div>`
-    ).join('');
-}
-function renderPhrases() {
-    const grid = document.getElementById('themeGrid');
-    let html = '<div class="redemittel-grid">';
-    REDEMITTEL.forEach((cat, i) => {
-        const ac = REDEMITTEL_AR[i];
-        html += `<div><div class="redemittel-cat-title">${cat.cat}${em()?'':' <span class="ar-cat">('+ac.cat+')</span>'}</div>`;
-        cat.items.forEach((item, j) => { html += phraseBlock(item, ac.items[j]); });
-        html += `</div>`;
+    const filtered = THEMES.filter(t => t.problem && (!q || t.problem.titleDe.toLowerCase().includes(q) || t.problem.textDe.toLowerCase().includes(q)));
+    let html = '<div class="card-list">';
+    filtered.forEach(t => {
+        const exam = getExam(t.id);
+        const probDe = (exam && exam.teil3De) || t.problem.textDe;
+        const chkd = state.done.includes(t.id);
+        html += `<div class="theme-card" onclick="openProblem(${t.id})">
+            <div class="tc-header"><span>${t.icon} ${t.problem.titleDe}</span><span class="tc-ar">${t.problem.titleAr}</span></div>
+            <div class="tc-text">${probDe}</div>
+        </div>`;
     });
     html += '</div>';
     grid.innerHTML = html;
-}
-// ============================================================
-// DETAIL VIEW
-// ============================================================
-function collapsibleSection(title, content, sectionId, themeId) {
-    const saveBtn = sectionId ? `<span class="save-section-btn" id="saveSec_${sectionId}" onclick="event.stopPropagation();saveSectionFromTheme('${sectionId}',${themeId})">📋</span>` : '';
-    return `<div class="section collapsible">
-        <div class="section-title" onclick="toggleSection(this)">
-            <span class="toggle-icon">▶</span> ${title}${saveBtn}
-        </div>
-        <div class="section-content">${content}</div>
-    </div>`;
 }
 function openTheme(id) {
     const t = THEMES.find(x => x.id === id);
@@ -446,15 +810,19 @@ function openTheme(id) {
     chk.className = 'theme-check' + (state.done.includes(t.id) ? ' done' : '');
     chk.textContent = state.done.includes(t.id) ? '✓' : '';
     let html = '';
-    // Text
-    html += collapsibleSection('📄 Inhalt', langSpan(t.textDe, t.textAr), 'inhalt', t.id);
+    // Text - show both regular content (with Arabic) and exam text if available
+    const exam = getExam(t.id);
+    html += collapsibleSection('📄 Inhalt / المحتوى', langSpan(t.textDe, t.textAr), 'inhalt', t.id, t.textDe);
+    if (exam) {
+        html += collapsibleSection('📄 Prüfungstext (B2) / نص الامتحان', langSpan(exam.teil2De, exam.teil2Ar || t.textAr), null, null, exam.teil2De);
+    }
     // Meinung
     if (t.meinungDe) {
-        html += collapsibleSection('💬 Meinung', langSpan(t.meinungDe, t.meinungAr), 'meinung', t.id);
+        html += collapsibleSection('💬 Meinung / الرأي', langSpan(t.meinungDe, t.meinungAr), 'meinung', t.id, t.meinungDe);
     }
     // Erfahrung
     if (t.erfahrungDe) {
-        html += collapsibleSection('📖 Erfahrung', langSpan(t.erfahrungDe, t.erfahrungAr), 'erfahrung', t.id);
+        html += collapsibleSection('📖 Erfahrung / تجربة', langSpan(t.erfahrungDe, t.erfahrungAr), 'erfahrung', t.id, t.erfahrungDe);
     }
     // Vocab
     if (t.vocab && t.vocab.length) {
@@ -464,47 +832,49 @@ function openTheme(id) {
             vh += `<li class="vocab-item"><span class="vocab-de">${v.de}</span>${em()?'':'<span class="vocab-ar">'+v.ar+'</span>'}<button class="vocab-save" onclick="saveVocabFromTheme('${v.de.replace(/'/g,"\\'")}','${v.ar.replace(/'/g,"\\'")}',this)" ${saved?'disabled':''}>${saved?'✓':'+'}</button></li>`;
         });
         vh += '</ul>';
-        html += collapsibleSection('📝 Wortschatz', vh);
+        html += collapsibleSection('📝 Wortschatz / المفردات', vh);
     }
     // Pro
     if (t.proDe && t.proDe.length) {
         let ph = '<div class="arg-list">';
         t.proDe.forEach((a, i) => { ph += argCard('pro', a, t.proAr[i]); });
         ph += '</div>';
-        html += collapsibleSection('✅ Pro-Argumente', ph);
+        html += collapsibleSection('✅ Pro-Argumente / الحجج المؤيدة', ph);
     }
     // Contra
     if (t.contraDe && t.contraDe.length) {
         let ch = '<div class="arg-list">';
         t.contraDe.forEach((a, i) => { ch += argCard('contra', a, t.contraAr[i]); });
         ch += '</div>';
-        html += collapsibleSection('❌ Contra-Argumente', ch);
+        html += collapsibleSection('❌ Contra-Argumente / الحجج المعارضة', ch);
     }
     // Phrases
     if (t.phrasesDe && t.phrasesDe.length) {
         let rh = '';
         t.phrasesDe.forEach((p, i) => { rh += phraseBlock(p, t.phrasesAr[i]); });
-        html += collapsibleSection('💬 Redemittel', rh);
+        html += collapsibleSection('💬 Redemittel / العبارات', rh);
     }
     // Problem
     if (t.problem) {
         let ph = '';
+        const probDe = (exam && exam.teil3De) || t.problem.textDe;
+        const probAr = (exam && exam.teil3Ar) || t.problem.textAr;
         if(em()){
-            ph += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-text-de">${t.problem.textDe}</div></div>`;
+            ph += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-text-de">${clickableText(probDe)}</div></div>`;
         } else {
-            ph += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-title-ar">${t.problem.titleAr}</div><div class="ps-text-de">${t.problem.textDe}</div><div class="ps-text-ar">${t.problem.textAr}</div></div>`;
+            ph += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-title-ar">${t.problem.titleAr}</div><div class="ps-text-de">${clickableText(probDe)}</div><div class="ps-text-ar">${probAr}</div></div>`;
         }
         if (t.problemIdeasDe) {
             if(!em()) ph += `<div style="font-size:10px;color:var(--text-muted);font-weight:600;margin:6px 0 4px">Ideen / الأفكار:</div>`;
             t.problemIdeasDe.forEach((idea, i) => { ph += ideaBlock(idea, t.problemIdeasAr[i]); });
         }
-        html += collapsibleSection('🧩 Problemlösung', ph);
+        html += collapsibleSection('🧩 Problemlösung / حل المشكلات', ph, null, null, probDe);
     }
     // Q&A
-    html += `<div class="qa-area"><details><summary>💡 Frage zu diesem Thema stellen</summary>
+    html += `<div class="qa-area"><details><summary>💡 Frage zu diesem Thema stellen / اطرح سؤالاً</summary>
         <div class="qa-input-wrap">
             <input class="qa-input" id="qaInput" placeholder="z.B. Pro?, Contra?, Vokabeln?, Meinung?" onkeydown="if(event.key==='Enter')askQuestion()">
-            <button class="qa-btn" onclick="askQuestion()">Fragen</button>
+            <button class="qa-btn" onclick="askQuestion()">Fragen / اسأل</button>
         </div>
         <div class="qa-hint">💡 Pro / Contra / Vokabeln / Meinung / Text / Lösung</div>
         <div class="qa-question" id="qaQuestion"></div>
@@ -522,12 +892,15 @@ function openProblem(id) {
     document.getElementById('detailTitleAr').textContent = t.problem.titleAr;
     document.getElementById('detailCheck').style.display = 'none';
     let html = '';
+    const exam = getExam(t.id);
+    const probDe = (exam && exam.teil3De) || t.problem.textDe;
+    const probAr = (exam && exam.teil3Ar) || t.problem.textAr;
     // Scenario
     html += `<div class="section"><div class="section-title" style="color:var(--blue);text-transform:none;letter-spacing:0">🧩 Aufgabe</div>`;
     if(em()){
-        html += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-text-de">${t.problem.textDe}</div></div>`;
+        html += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-text-de">${clickableText(probDe)}</div></div>`;
     } else {
-        html += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-title-ar">${t.problem.titleAr}</div><div class="ps-text-de">${t.problem.textDe}</div><div class="ps-text-ar">${t.problem.textAr}</div></div>`;
+        html += `<div class="ps-card"><div class="ps-title-de">${t.problem.titleDe}</div><div class="ps-title-ar">${t.problem.titleAr}</div><div class="ps-text-de">${clickableText(probDe)}</div><div class="ps-text-ar">${probAr}</div></div>`;
     }
     html += `</div>`;
     // Ideas
@@ -549,6 +922,9 @@ function closeDetail() {
     state.currentTheme = null;
     const chk = document.getElementById('detailCheck');
     chk.style.display = '';
+    // Stop any playing speech
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    document.querySelectorAll('.tts-btn.playing').forEach(function(b){b.classList.remove('playing');});
 }
 // ============================================================
 // DONE
@@ -907,6 +1283,7 @@ function toggleVocabCat(ci) {
     vocabCatOpen[ci] = !vocabCatOpen[ci];
     renderVocab();
 }
+
 // ============================================================
 // BOOT
 // ============================================================
